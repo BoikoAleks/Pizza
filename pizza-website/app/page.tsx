@@ -64,6 +64,52 @@ export default function Home() {
                     items: [{ price: 300 }],
                   },
                 ]}
+                categoryId={1}
+              />
+              <ProductGroupList
+                title="Комбо"
+                items={[
+                  {
+                    id: 6,
+                    name: "Піца",
+                    imageUrl:
+                      "https://cdn-media.choiceqr.com/prod-eat-nonnamacarona/menu/PLCtGlF-FtdyHMk-UyDkYDy.webp",
+                    price: 300,
+                    items: [{ price: 300 }],
+                  },
+                  {
+                    id: 7,
+                    name: "Піца",
+                    imageUrl:
+                      "https://cdn-media.choiceqr.com/prod-eat-nonnamacarona/menu/PLCtGlF-FtdyHMk-UyDkYDy.webp",
+                    price: 300,
+                    items: [{ price: 300 }],
+                  },
+                  {
+                    id: 8,
+                    name: "Піца",
+                    imageUrl:
+                      "https://cdn-media.choiceqr.com/prod-eat-nonnamacarona/menu/PLCtGlF-FtdyHMk-UyDkYDy.webp",
+                    price: 300,
+                    items: [{ price: 300 }],
+                  },
+                  {
+                    id: 9,
+                    name: "Піца",
+                    imageUrl:
+                      "https://cdn-media.choiceqr.com/prod-eat-nonnamacarona/menu/PLCtGlF-FtdyHMk-UyDkYDy.webp",
+                    price: 300,
+                    items: [{ price: 300 }],
+                  },
+                  {
+                    id: 10,
+                    name: "Піца",
+                    imageUrl:
+                      "https://cdn-media.choiceqr.com/prod-eat-nonnamacarona/menu/PLCtGlF-FtdyHMk-UyDkYDy.webp",
+                    price: 300,
+                    items: [{ price: 300 }],
+                  },
+                ]}
                 categoryId={2}
               />
             </div>
