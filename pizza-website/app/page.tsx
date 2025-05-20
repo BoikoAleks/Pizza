@@ -27,7 +27,7 @@ export default function Home() {
                     id: 1,
                     name: "Піца",
                     imageUrl:
-                      "https://cdn-media.choiceqr.com/prod-eat-nonnamacarona/menu/PLCtGlF-FtdyHMk-UyDkYDy.webp",
+                      "/images/pizza/provence.webp",
                     price: 300,
                     items: [{ price: 300 }],
                   },

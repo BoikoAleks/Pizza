@@ -1,8 +1,41 @@
-import { prisma } from "./prisma-client";
 import { hashSync } from "bcrypt";
+import { prisma } from "./prisma-client";
+import { categories, ingredients, products } from "./constants";
+
+// Генератор ціни для ProductItem
+const randomDecimalNumber = (min: number, max: number) => {
+  return Math.floor(Math.random() * (max - min) * 10 + min * 10) / 10;
+};
+
+const generateProductItem = ({
+  productId,
+  pizzaType,
+  size,
+}: {
+  productId: number;
+  pizzaType?: 1 | 2;
+  size?: 20 | 30 | 40;
+}) => {
+  return {
+    productId,
+    price: randomDecimalNumber(100, 500),
+    pizzaType,
+    size,
+  };
+};
+
+async function down() {
+  await prisma.productItem.deleteMany();
+  await prisma.product.deleteMany();
+  await prisma.ingredient.deleteMany();
+  await prisma.category.deleteMany();
+  await prisma.user.deleteMany();
+  await prisma.cartItem.deleteMany();
+  await prisma.cart.deleteMany();
+}
 
 async function up() {
-  console.log(11111);
+  // 1. Користувачі
   await prisma.user.createMany({
     data: [
       {
@@ -22,127 +55,81 @@ async function up() {
     ],
   });
 
-  await prisma.category.createMany({
-    data: [
-      {
-        name: "Піца",
-      },
-      {
-        name: "Комбо",
-      },
-      {
-        name: "Закуски",
-      },
-      {
-        name: "Коктейлі",
-      },
-      {
-        name: "Кава",
-      },
-      {
-        name: "Напої",
-      },
-      {
-        name: "Десерти",
-      },
-    ],
-  });
-  await prisma.ingredient.createMany({
-    data: [
-      {
-        name: "Шинка",
-        price: 35,
-        imageUrl: "https://api.pizza.black/ingredients-resized/ham.png",
-      },
-      {
-        name: "Бекон",
-        price: 35,
-        imageUrl: "https://api.pizza.black/ingredients-resized/bacon.png",
-      },
-      {
-        name: "Томати черрі",
-        price: 28,
-        imageUrl:
-          "https://api.pizza.black/ingredients-resized/tomatoes-cherry.png",
-      },
-      {
-        name: "Курка",
-        price: 40,
-        imageUrl: "https://api.pizza.black/ingredients-resized/chicken.png",
-      },
-      {
-        name: "Печериці",
-        price: 25,
-        imageUrl: "https://api.pizza.black/ingredients-resized/mushrooms.png",
-      },
-      {
-        name: "Гострий перець",
-        price: 30,
-        imageUrl:
-          "https://api.pizza.black/ingredients-resized/pepper-chile.png",
-      },
-      {
-        name: "Кукурудза",
-        price: 22,
-        imageUrl: "https://api.pizza.black/ingredients-resized/corn.png",
-      },
-      {
-        name: "Цибуля",
-        price: 20,
-        imageUrl: "https://api.pizza.black/ingredients-resized/onion.png",
-      },
-      {
-        name: "Маслини",
-        price: 25,
-        imageUrl: "https://api.pizza.black/ingredients-resized/olives.png",
-      },
-      {
-        name: "Салямі",
-        price: 35,
-        imageUrl: "https://api.pizza.black/ingredients-resized/salami.png",
-      },
-    ].map((obj, index) => ({ id: index + 1, ...obj })),
-  });
+  // 2. Категорії
+  await prisma.category.createMany({ data: categories });
+  const dbCategories = await prisma.category.findMany();
+  const pizzaCategoryId = dbCategories.find(c => c.name === "Піца")!.id;
+  const drinksCategoryId = dbCategories.find(c => c.name === "Напої")!.id;
 
+  // 3. Інгредієнти
+  await prisma.ingredient.createMany({ data: ingredients });
+
+  // 4. Напої та інші продукти з constants
   await prisma.product.createMany({
-    data: [
-      {
-        name: "Тест Не піцца має бути",
-        imageUrl:
-          "https://cdn-media.choiceqr.com/prod-eat-nonnamacarona/menu/PLCtGlF-FtdyHMk-UyDkYDy.webp",
-        categoryId: 1,
-      },
-    ],
+    data: products.map(p => ({
+      ...p,
+      categoryId: drinksCategoryId,
+    })),
   });
 
+  // 5. Піци з інгредієнтами
   const pizza1 = await prisma.product.create({
     data: {
-      name: 'Гавайська',
-      imageUrl:
-        "https://api.pizza.black/storage/productImages/2022/9/2/55/%D0%93%D0%B0%D0%B2%D0%B0%D1%96%CC%88.webp",
-      categoryId: 1,
+      name: "Гавайська",
+      imageUrl: "/images/pizza/gavaicka.webp",
+      categoryId: pizzaCategoryId,
       ingredients: {
-        connect: ingredient.slice(0, 5),
+        connect: ingredients.slice(0, 5).map(i => ({ id: i.id })),
       },
     },
   });
   const pizza2 = await prisma.product.create({
     data: {
-      name: 'Карпезе',
-      imageUrl:
-        "https://api.pizza.black/storage/productImages/2022/9/2/94/%D0%9A%D0%B0%D0%BF%D1%80%D0%B5%D0%B7%D0%B51.webp",
-      categoryId: 1,
+      name: "Карпезе",
+      imageUrl: "/images/pizza/caprese.webp",
+      categoryId: pizzaCategoryId,
       ingredients: {
-        connect: ingredients.slice(5, 10),
+        connect: ingredients.slice(5, 10).map(i => ({ id: i.id })),
+      },
+    },
+  });
+  const pizza3 = await prisma.product.create({
+    data: {
+      name: "Пепероні",
+      imageUrl: "/images/pizza/peperoni.webp",
+      categoryId: pizzaCategoryId,
+      ingredients: {
+        connect: ingredients.slice(10, 15).map(i => ({ id: i.id })),
       },
     },
   });
 
-  await prisma.productItem
-}
+  // 6. ProductItem для піц
+  await prisma.productItem.createMany({
+    data: [
+      // Гавайська
+      generateProductItem({ productId: pizza1.id, pizzaType: 1, size: 20 }),
+      generateProductItem({ productId: pizza1.id, pizzaType: 1, size: 30 }),
+      generateProductItem({ productId: pizza1.id, pizzaType: 1, size: 40 }),
+      generateProductItem({ productId: pizza1.id, pizzaType: 2, size: 30 }),
+      generateProductItem({ productId: pizza1.id, pizzaType: 2, size: 40 }),
 
-async function down() {
-  await prisma.user.deleteMany({});
+      // Карпезе
+      generateProductItem({ productId: pizza2.id, pizzaType: 1, size: 20 }),
+      generateProductItem({ productId: pizza2.id, pizzaType: 1, size: 30 }),
+      generateProductItem({ productId: pizza2.id, pizzaType: 2, size: 20 }),
+      generateProductItem({ productId: pizza2.id, pizzaType: 2, size: 30 }),
+      generateProductItem({ productId: pizza2.id, pizzaType: 2, size: 40 }),
+
+      // Пепероні
+      generateProductItem({ productId: pizza3.id, pizzaType: 1, size: 20 }),
+      generateProductItem({ productId: pizza3.id, pizzaType: 1, size: 30 }),
+      generateProductItem({ productId: pizza3.id, pizzaType: 1, size: 40 }),
+      generateProductItem({ productId: pizza3.id, pizzaType: 2, size: 30 }),
+      generateProductItem({ productId: pizza3.id, pizzaType: 2, size: 40 }),
+
+    ],
+  });
 }
 
 async function main() {
