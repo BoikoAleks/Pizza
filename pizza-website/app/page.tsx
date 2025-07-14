@@ -1,14 +1,26 @@
 import { Container, Filters, Title, TopBar } from "@/components/shared";
 import { ProductGroupList } from "@/components/shared/product-group-list";
+import { prisma } from "@/prisma/prisma-client";
 
-export default function Home() {
+export default async function Home() {
+  const categories = await prisma.category.findMany({
+    include: {
+      products: {
+        include: {
+          ingredients: true,
+          items: true,
+        },
+      },
+    },
+  });
+
   return (
     <>
       <Container className="mt-8">
         <Title text="Всі піци" size="lg" className="font-extrabold" />
       </Container>
 
-      <TopBar />
+      <TopBar categories={categories.filter((category) => category.products.length > 0)}/>
 
       <Container className=" mt-10 pb-14">
         <div className="flex gap-[80px]">
@@ -20,98 +32,19 @@ export default function Home() {
           {/* Список товарів */}
           <div className="flex-1">
             <div className="flex flex-col gap-16">
-              <ProductGroupList
-                title="Піца"
-                items={[
-                  {
-                    id: 1,
-                    name: "Піца",
-                    imageUrl:
-                      "/images/pizza/provence.webp",
-                    price: 300,
-                    items: [{ price: 300 }],
-                  },
-                  {
-                    id: 2,
-                    name: "Піца",
-                    imageUrl:
-                      "https://cdn-media.choiceqr.com/prod-eat-nonnamacarona/menu/PLCtGlF-FtdyHMk-UyDkYDy.webp",
-                    price: 300,
-                    items: [{ price: 300 }],
-                  },
-                  {
-                    id: 3,
-                    name: "Піца",
-                    imageUrl:
-                      "https://cdn-media.choiceqr.com/prod-eat-nonnamacarona/menu/PLCtGlF-FtdyHMk-UyDkYDy.webp",
-                    price: 300,
-                    items: [{ price: 300 }],
-                  },
-                  {
-                    id: 4,
-                    name: "Піца",
-                    imageUrl:
-                      "https://cdn-media.choiceqr.com/prod-eat-nonnamacarona/menu/PLCtGlF-FtdyHMk-UyDkYDy.webp",
-                    price: 300,
-                    items: [{ price: 300 }],
-                  },
-                  {
-                    id: 5,
-                    name: "Піца",
-                    imageUrl:
-                      "https://cdn-media.choiceqr.com/prod-eat-nonnamacarona/menu/PLCtGlF-FtdyHMk-UyDkYDy.webp",
-                    price: 300,
-                    items: [{ price: 300 }],
-                  },
-                ]}
-                categoryId={1}
-              />
-              <ProductGroupList
-                title="Комбо"
-                items={[
-                  {
-                    id: 6,
-                    name: "Піца",
-                    imageUrl:
-                      "https://cdn-media.choiceqr.com/prod-eat-nonnamacarona/menu/PLCtGlF-FtdyHMk-UyDkYDy.webp",
-                    price: 300,
-                    items: [{ price: 300 }],
-                  },
-                  {
-                    id: 7,
-                    name: "Піца",
-                    imageUrl:
-                      "https://cdn-media.choiceqr.com/prod-eat-nonnamacarona/menu/PLCtGlF-FtdyHMk-UyDkYDy.webp",
-                    price: 300,
-                    items: [{ price: 300 }],
-                  },
-                  {
-                    id: 8,
-                    name: "Піца",
-                    imageUrl:
-                      "https://cdn-media.choiceqr.com/prod-eat-nonnamacarona/menu/PLCtGlF-FtdyHMk-UyDkYDy.webp",
-                    price: 300,
-                    items: [{ price: 300 }],
-                  },
-                  {
-                    id: 9,
-                    name: "Піца",
-                    imageUrl:
-                      "https://cdn-media.choiceqr.com/prod-eat-nonnamacarona/menu/PLCtGlF-FtdyHMk-UyDkYDy.webp",
-                    price: 300,
-                    items: [{ price: 300 }],
-                  },
-                  {
-                    id: 10,
-                    name: "Піца",
-                    imageUrl:
-                      "https://cdn-media.choiceqr.com/prod-eat-nonnamacarona/menu/PLCtGlF-FtdyHMk-UyDkYDy.webp",
-                    price: 300,
-                    items: [{ price: 300 }],
-                  },
-                ]}
-                categoryId={2}
-              />
+              {
+                categories.map((category) => 
+                  category.products.length > 0 && (
+                    <ProductGroupList
+                      key={category.id}
+                      title={category.name}
+                      categoryId={category.id}
+                      items={category.products}
+
+                      />
+                    ),
+                )}  
+              
             </div>
           </div>
         </div>
