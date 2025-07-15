@@ -70,7 +70,7 @@ export const Filters: React.FC<Props> = ({ className }) => {
             type="number"
             placeholder="0"
             min={0}
-            max={500}
+            max={400}
             value={String(filters.prices.priceFrom)}
             onChange={(e) =>
               filters.setPrices("priceFrom", Number(e.target.value))
@@ -79,7 +79,8 @@ export const Filters: React.FC<Props> = ({ className }) => {
           <Input
             type="number"
             min={100}
-            max={500}
+            max={400}
+            placeholder="400"
             value={String(filters.prices.priceTo)}
             onChange={(e) =>
               filters.setPrices("priceTo", Number(e.target.value))
@@ -101,7 +102,7 @@ export const Filters: React.FC<Props> = ({ className }) => {
         name="ingredients"
         className="mt-5"
         limit={5}
-        defaultItem={items.slice(0, 6)}
+        defaultItem={items.slice(0, 5)}
         items={items}
         loading={loading}
         onClickCheckbox={filters.setSelectedIngredients}

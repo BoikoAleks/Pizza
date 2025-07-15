@@ -17,7 +17,7 @@ interface Props {
   selectedValue?: Variant["value"];
 }
 
-export const GroupVariants: React.FC<Props> = ({ items, onClick, selectedValue, className }) => {
+export const GroupVariants: React.FC<Props> = ({ items, onClick, className }) => {
   return (
     <div
       className={cn(

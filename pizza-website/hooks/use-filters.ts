@@ -54,8 +54,8 @@ export const useFilters = (): ReturnProps => {
   );
   // Фільтр для ціни
   const [prices, setPrices] = React.useState<PriceProps>({
-    priceFrom: Number(searchParams.get("priceFrom")),
-    priceTo: Number(searchParams.get("priceTo")),
+    priceFrom: Number(searchParams.get("priceFrom")) || undefined,
+    priceTo: Number(searchParams.get("priceTo")) || undefined,
   });
 
   const updatePrice = (name: keyof PriceProps, value: number) => {
