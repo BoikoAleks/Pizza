@@ -1,5 +1,5 @@
 /* eslint-disable @next/next/no-img-element */
-import { cn } from "@/shared/lib/utils";
+import { cn } from "../../lib/utils";
 import React from "react";
 
 interface Props {

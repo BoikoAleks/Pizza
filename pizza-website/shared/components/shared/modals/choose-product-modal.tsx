@@ -1,12 +1,14 @@
-'use client';
+"use client";
 
-import { Dialog } from "@/shared/components/ui";
-import { DialogContent, DialogTitle } from "@/shared/components/ui/dialog";
-import { cn } from "@/shared/lib/utils";
+import React from "react";
 import { useRouter } from "next/navigation";
-import { ChooseProductForm } from "../choose-product-form";
-import { ProductWithRelations } from "@/@types/prisma";
+
 import { ChoosePizzaForm } from "../choose-pizza-form";
+import { ChooseProductForm } from "../choose-product-form";
+import { ProductWithRelations } from "../../../../@types/prisma";
+import { Dialog } from "../../ui";
+import { DialogContent } from "../../ui/dialog";
+import { cn } from "../../../lib/utils";
 
 interface Props {
   product: ProductWithRelations;
@@ -22,17 +24,14 @@ export const ChooseProductModal: React.FC<Props> = ({ product, className }) => {
       <DialogContent
         className={cn(
           "p-0 w-[1060px] max-w-[1060px] min-h-[500px] bg-white overflow-hidden",
-          className,
+          className
         )}
       >
-        <DialogTitle className="text-lg font-bold">
-          {isPizzaForm ? "Choose Pizza" : "Choose Product"}
-        </DialogTitle>
         {isPizzaForm ? (
           <ChoosePizzaForm
             imageUrl={product.imageUrl}
             name={product.name}
-            ingredients={[]}
+            ingredients={product.ingredients}
           />
         ) : (
           <ChooseProductForm imageUrl={product.imageUrl} name={product.name} />

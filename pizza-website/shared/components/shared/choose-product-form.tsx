@@ -1,8 +1,10 @@
 /* eslint-disable @next/next/no-img-element */
-import { cn } from "@/shared/lib/utils";
+
+
 import React from "react";
 import { Title } from "./title";
 import { Button } from "../ui";
+import { cn } from "../../lib/utils";
 
 interface Props {
   imageUrl: string;
@@ -34,7 +36,7 @@ export const ChooseProductForm: React.FC<Props> = ({
 
         <p className="text-gray-400">{textDetails}</p>
 
-        <Button className="h-[55px]  px-10 text-base rounded-18[px] w-full mt-10">
+        <Button className="h-[55px] px-10 text-base rounded-[18px] w-full mt-10">
           Додати до кошика за {totalprice} грн
         </Button>
       </div>

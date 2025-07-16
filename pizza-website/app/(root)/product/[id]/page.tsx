@@ -1,8 +1,9 @@
-import { Container, Title } from "@/shared/components/shared";
-import { GroupVariants } from "@/shared/components/shared/group-variants";
-import { PizzaImage } from "@/shared/components/shared/pizza-image";
-import { prisma } from "@/prisma/prisma-client";
+
 import { notFound } from "next/navigation";
+import { prisma } from "../../../../prisma/prisma-client";
+import { Container, Title } from "../../../../shared/components/shared";
+import { PizzaImage } from "../../../../shared/components/shared/pizza-image";
+import { GroupVariants } from "../../../../shared/components/shared/group-variants";
 
 export default async function ProductPage({
   params: { id },
@@ -32,7 +33,7 @@ export default async function ProductPage({
           <p className="text-gray-400">text Details</p>
 
           <GroupVariants
-          selectedValue="1"
+          value="1"
             items={[
               {
                 name: "Маленька ",
