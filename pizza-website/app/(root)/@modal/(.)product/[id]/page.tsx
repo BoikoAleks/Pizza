@@ -1,8 +1,8 @@
-import { ChooseProductModal } from "@/components/shared/modals";
+import { ChooseProductModal, Container } from "@/shared/components/shared";
 import { prisma } from "@/prisma/prisma-client";
 import { notFound } from "next/navigation";
 
-export default async function ProductModalPage({
+export default async function ProductPage({
   params: { id },
 }: {
   params: { id: string };
@@ -11,13 +11,26 @@ export default async function ProductModalPage({
     where: { id: Number(id) },
     include: {
       ingredients: true,
+      category: {
+        include: {
+          products: {
+            include: {
+              items: true,
+            },
+          },
+        },
+      },
       items: true,
     },
   });
 
   if (!product) {
-    return notFound(); 
+    return notFound();
   }
 
-  return <ChooseProductModal product={product!} />;
+  return (
+    <Container className="flex flex-col my-10">
+      <ChooseProductModal product={product} />
+    </Container>
+  );
 }
