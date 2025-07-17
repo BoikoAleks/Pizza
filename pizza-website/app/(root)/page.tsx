@@ -1,4 +1,3 @@
-
 import { prisma } from "../../prisma/prisma-client";
 import { Filters, Title, TopBar } from "../../shared/components/shared";
 import { Container } from "../../shared/components/shared/container";

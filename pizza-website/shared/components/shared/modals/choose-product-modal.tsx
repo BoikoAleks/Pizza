@@ -1,14 +1,13 @@
 "use client";
 
 import React from "react";
-import { useRouter } from "next/navigation";
-
 import { ChoosePizzaForm } from "../choose-pizza-form";
 import { ChooseProductForm } from "../choose-product-form";
 import { ProductWithRelations } from "../../../../@types/prisma";
 import { Dialog } from "../../ui";
 import { DialogContent } from "../../ui/dialog";
 import { cn } from "../../../lib/utils";
+import { useRouter } from "next/navigation";
 
 interface Props {
   product: ProductWithRelations;
