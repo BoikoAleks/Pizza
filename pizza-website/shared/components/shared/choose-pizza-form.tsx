@@ -12,13 +12,14 @@ import {
   pizzaTypes,
 } from "../../constants/pizza";
 import { IngredientItem } from "./ingredient-item";
+import { Ingredient } from "@prisma/client";
 
 interface Props {
   imageUrl: string;
   name: string;
   className?: string;
-  ingredients: any[];
-  items?: Ingredient[];
+  ingredients: Ingredient[];
+  items?: any[];
   onClickAdd?: VoidFunction;
 }
 

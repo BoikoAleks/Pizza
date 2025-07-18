@@ -22,18 +22,29 @@ export const SearchInput: React.FC<Props> = ({ className }) => {
     setFocused(false);
   });
 
+  // --- ПОЧАТОК ЗМІН ---
   useDebounce(
     async () => {
+      // Якщо пошуковий запит порожній (після видалення пробілів),
+      // не робимо запит до сервера, а просто очищуємо результати.
+      if (!searchQuery.trim()) {
+        setProducts([]);
+        return;
+      }
+
       try {
+        // Цей код тепер виконається, тільки якщо searchQuery не порожній
         const response = await Api.products.search(searchQuery);
         setProducts(response);
       } catch (error) {
         console.error("Error fetching products:", error);
-      }      
+      }
     },
     250,
     [searchQuery]
   );
+  // --- КІНЕЦЬ ЗМІН ---
+
   const onClickItem = () => {
     setSearchQuery("");
     setProducts([]);

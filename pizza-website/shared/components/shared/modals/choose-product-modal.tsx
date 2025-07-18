@@ -4,8 +4,12 @@ import React from "react";
 import { ChoosePizzaForm } from "../choose-pizza-form";
 import { ChooseProductForm } from "../choose-product-form";
 import { ProductWithRelations } from "../../../../@types/prisma";
-import { Dialog } from "../../ui";
-import { DialogContent } from "../../ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader, // <-- 1. Імпортуємо DialogHeader
+  DialogTitle, // <-- 2. Імпортуємо DialogTitle
+} from "../../ui/dialog";
 import { cn } from "../../../lib/utils";
 import { useRouter } from "next/navigation";
 
@@ -22,15 +26,29 @@ export const ChooseProductModal: React.FC<Props> = ({ product, className }) => {
     <Dialog open={Boolean(product)} onOpenChange={() => router.back()}>
       <DialogContent
         className={cn(
-          "p-0 w-[1060px] max-w-[1060px] min-h-[500px] bg-white overflow-hidden",
+          "p-6 w-[1060px] max-w-[1060px] min-h-[100px] bg-white rounded-lg overflow-hidden",
           className
         )}
+        
       >
+        
+
+        
+        <DialogHeader>
+          <DialogTitle className="text-2xl font-bold mb-1">
+            {product.name}
+          </DialogTitle>
+        </DialogHeader>
+
+        {/* --- КІНЕЦЬ ЗМІН --- */}
+
+        {/* Ваша логіка для вибору форми залишається незмінною */}
         {isPizzaForm ? (
           <ChoosePizzaForm
             imageUrl={product.imageUrl}
             name={product.name}
             ingredients={product.ingredients}
+            
           />
         ) : (
           <ChooseProductForm imageUrl={product.imageUrl} name={product.name} />

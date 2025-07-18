@@ -1,9 +1,16 @@
-
+import { prisma } from './../../../prisma/prisma-client';
 import { NextResponse } from "next/server";
-import { prisma } from "../../../prisma/prisma-client";
+
 
 export async function GET() {
-  const ingredients = await prisma.ingredient.findMany();
-
-  return NextResponse.json(ingredients);
+  try {
+    const ingredients = await prisma.ingredient.findMany();
+    return NextResponse.json(ingredients, { status: 200 });
+  } catch (error) {
+    console.error("Error fetching ingredients:", error);
+    return NextResponse.json(
+      { error: "Failed to fetch ingredients" },
+      { status: 500 }
+    );
+  }
 }

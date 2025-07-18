@@ -1,5 +1,3 @@
-/* eslint-disable jsx-a11y/alt-text */
-/* eslint-disable @next/next/no-img-element */
 import React from "react";
 import { cn } from "../../lib/utils";
 import { CircleCheck } from "lucide-react";
@@ -10,10 +8,10 @@ interface Props {
   name: string;
   price: number;
   active?: boolean;
-  onClick?: () => void;
+  onClick?: React.MouseEventHandler<HTMLDivElement>;  // Типізація onClick
 }
 
-/* Вибираємо інгредієнти */ 
+/* Вибираємо інгредієнти */
 export const IngredientItem: React.FC<Props> = ({
   className,
   imageUrl,
@@ -34,9 +32,14 @@ export const IngredientItem: React.FC<Props> = ({
       {active && (
         <CircleCheck className="absolute top-2 right-2 text-primary" />
       )}
-      <img width={110} height={110} src={imageUrl} />
+      <img
+        width={110}
+        height={110}
+        src={imageUrl}
+        alt={name}  // Додано alt для доступності
+      />
       <span className="text-xs mb-1">{name}</span>
-      <span className="text-bold">{price} грн</span>
+      <span className="font-bold">{price} грн</span> {/* Виправлено на font-bold */}
     </div>
   );
 };
