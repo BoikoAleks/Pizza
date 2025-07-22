@@ -1,6 +1,5 @@
 /* eslint-disable @next/next/no-img-element */
 
-
 import React from "react";
 import { Title } from "./title";
 import { Button } from "../ui";

@@ -1,6 +1,5 @@
 {
   "compilerOptions": {
-    "target": "ES2017",
     "lib": [
       "dom",
       "dom.iterable",
@@ -8,20 +7,30 @@
     ],
     "allowJs": true,
     "skipLibCheck": true,
-    "strict": false,
+    "strict": true, // Рекомендую ввімкнути strict для надійності коду
     "noEmit": true,
-    "incremental": true,
-    "module": "esnext",
     "esModuleInterop": true,
-    "moduleResolution": "node",
+    "module": "esnext",
+    "moduleResolution": "bundler", // Більш сучасна опція для Next.js
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "preserve",
+    "incremental": true,
     "plugins": [
       {
         "name": "next"
       }
-    ]
+    ],
+    // --- ПОЧАТОК ДОДАНИХ ЗМІН ---
+    "baseUrl": ".",
+    "paths": {
+      "@/*": [
+        "./*"
+      ]
+    }
+    // --- КІНЕЦЬ ДОДАНИХ ЗМІН ---
+    ,
+    "target": "ES2017"
   },
   "include": [
     "next-env.d.ts",

@@ -1,10 +1,11 @@
 "use client";
+import { useCategoryStore } from "@/shared/store/category";
 import React from "react";
-import { Title } from "./title";
-import { cn } from "../../lib/utils";
 import { useIntersection } from "react-use";
+import { Title } from "@/shared/components/shared/title";
 import { ProductCard } from "./product-card";
-import { useCategoryStore } from "../../store/category";
+import { cn } from "@/shared/lib/utils";
+
 
 // 1. Створено типи для продукту, щоб позбутися `any`
 interface IProductItem {
@@ -34,10 +35,10 @@ export const ProductGroupList: React.FC<Props> = ({
   categoryId,
 }) => {
   const setActiveCategoryId = useCategoryStore((state) => state.setActiveId);
-  
+
   // 2. Вказано тип елемента для ref (`HTMLDivElement`), до якого він буде прив'язаний
-    const intersectionRef = React.useRef(null);
-  
+  const intersectionRef = React.useRef(null);
+
   const intersection = useIntersection(intersectionRef, {
     threshold: 0.4,
   });

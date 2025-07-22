@@ -1,6 +1,5 @@
 "use client";
 
-
 import React from "react";
 import { cn } from "../../lib/utils";
 
@@ -40,7 +39,7 @@ export const GroupVariants: React.FC<Props> = ({
             {
               "bg-white shadow": item.value === value,
               "text-gray-500 opacity-50 pointer-events-none": item.disabled,
-            },
+            }
           )}
         >
           {item.name}

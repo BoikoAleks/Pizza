@@ -3,7 +3,10 @@ export const categories = [
     name: 'Піца',
   },
   {
-    name: 'Комбо',
+    name: 'Сніданки',
+  },
+  {
+    name: 'Салати',
   },
   {
     name: 'Закуски',
@@ -26,52 +29,52 @@ export const ingredients = [
   {
     name: "Шинка",
     price: 35,
-    imageUrl: "/ingredients/ham.png",
+    imageUrl: "/images/ingredients/ham.png",
   },
   {
     name: "Бекон",
     price: 35,
-    imageUrl: "/ingredients/bacon.png",
+    imageUrl: "/images/ingredients/bacon.png",
   },
   {
     name: "Томати черрі",
     price: 28,
-    imageUrl: "/ingredients/cherry-tomatoes.png",
+    imageUrl: "/images/ingredients/tomatoes-cherry.png",
   },
   {
     name: "Курка",
     price: 40,
-    imageUrl: "/ingredients/chicken.png",
+    imageUrl: "/images/ingredients/chicken.png",
   },
   {
     name: "Печериці",
     price: 25,
-    imageUrl: "/ingredients/mushrooms.png",
+    imageUrl: "/images/ingredients/mushrooms.png",
   },
   {
     name: "Гострий перець",
     price: 30,
-    imageUrl: "/ingredients/spicy-pepper.png",
+    imageUrl: "/images/ingredients/pepper-chile.png",
   },
   {
     name: "Кукурудза",
     price: 22,
-    imageUrl: "/ingredients/corn.png",
+    imageUrl: "/images/ingredients/corn.png",
   },
   {
     name: "Цибуля",
     price: 20,
-    imageUrl: "/ingredients/onion.png",
+    imageUrl: "/images/ingredients/onion.png",
   },
   {
     name: "Маслини",
     price: 25,
-    imageUrl: "/ingredients/olives.png",
+    imageUrl: "/images/ingredients/olives.png",
   },
   {
     name: "Салямі",
     price: 35,
-    imageUrl: "/ingredients/salami.png",
+    imageUrl: "/images/ingredients/salami.png",
   },
 ].map((obj, index) => ({ id: index + 1, ...obj }));
 
@@ -101,4 +104,5 @@ export const products = [
         imageUrl: '/images/drinks/Sprite.webp',
         categoryId: 6,
     }
+    
 ];

@@ -1,9 +1,9 @@
+/* eslint-disable @next/next/no-img-element */
 import Link from "next/link";
 import React from "react";
 import { Title } from "./title";
 import { Button } from "../ui";
 import { Plus } from "lucide-react";
-import Image from "next/image"; // Додаємо імпорт для Image
 
 interface Props {
   id: number;
@@ -26,7 +26,7 @@ export const ProductCard: React.FC<Props> = ({
         <div className="flex justify-center p-6 bg-secondary rounded-lg h-[250px]">
           {" "}
           {/* Виправлено висоту */}
-          <Image
+          <img
             width={700}
             height={715}
             src={imageUrl}

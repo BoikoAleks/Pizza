@@ -3,7 +3,6 @@ import { Filters } from "./use-filters";
 import qs from "qs";
 import { useRouter } from "next/navigation";
 
-
 // Хук для синхронізації фільтрів з URL
 export const useQueryFilters = (filters: Filters) => {
   const router = useRouter();

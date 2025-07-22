@@ -1,6 +1,7 @@
 import React from "react";
 import { cn } from "../../lib/utils";
 import { CircleCheck } from "lucide-react";
+import Image from "next/image";
 
 interface Props {
   className?: string;
@@ -8,14 +9,14 @@ interface Props {
   name: string;
   price: number;
   active?: boolean;
-  onClick?: React.MouseEventHandler<HTMLDivElement>;  // Типізація onClick
+  onClick?: React.MouseEventHandler<HTMLDivElement>; // Типізація onClick
 }
 
 /* Вибираємо інгредієнти */
 export const IngredientItem: React.FC<Props> = ({
   className,
-  imageUrl,
   name,
+  imageUrl,
   price,
   active = false,
   onClick,
@@ -32,14 +33,9 @@ export const IngredientItem: React.FC<Props> = ({
       {active && (
         <CircleCheck className="absolute top-2 right-2 text-primary" />
       )}
-      <img
-        width={110}
-        height={110}
-        src={imageUrl}
-        alt={name}  // Додано alt для доступності
-      />
+      <Image src={imageUrl} alt="ingredients" width={100} height={100} />
       <span className="text-xs mb-1">{name}</span>
-      <span className="font-bold">{price} грн</span> {/* Виправлено на font-bold */}
+      <span className="font-bold">{price} грн</span>{" "}
     </div>
   );
 };

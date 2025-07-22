@@ -1,15 +1,24 @@
+// app/(root)/product/[id]/page.tsx - ВИПРАВЛЕНА ВЕРСІЯ
 
 import { notFound } from "next/navigation";
-import { prisma } from "../../../../prisma/prisma-client";
-import { Container, Title } from "../../../../shared/components/shared";
-import { PizzaImage } from "../../../../shared/components/shared/pizza-image";
-import { GroupVariants } from "../../../../shared/components/shared/group-variants";
+import { prisma } from "@/prisma/prisma-client";
+import { Container, Title } from "@/shared/components/shared";
+import { PizzaImage } from "@/shared/components/shared/pizza-image";
+import { GroupVariants } from "@/shared/components/shared/group-variants";
 
+// --- ПОЧАТОК ВИПРАВЛЕННЯ ---
+
+// Приймаємо `params` як цілий об'єкт
 export default async function ProductPage({
-  params: { id },
+  params,
 }: {
   params: { id: string };
 }) {
+  // Дістаємо `id` з `params` вже всередині функції
+  const { id } = params;
+
+// --- КІНЕЦЬ ВИПРАВЛЕННЯ ---
+
   const product = await prisma.product.findFirst({
     where: { id: Number(id) },
   });
@@ -33,7 +42,7 @@ export default async function ProductPage({
           <p className="text-gray-400">text Details</p>
 
           <GroupVariants
-          value="1"
+            value="1"
             items={[
               {
                 name: "Маленька ",

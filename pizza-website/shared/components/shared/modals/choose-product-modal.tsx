@@ -7,8 +7,8 @@ import { ProductWithRelations } from "../../../../@types/prisma";
 import {
   Dialog,
   DialogContent,
-  DialogHeader, // <-- 1. Імпортуємо DialogHeader
-  DialogTitle, // <-- 2. Імпортуємо DialogTitle
+  DialogHeader,
+  DialogTitle, 
 } from "../../ui/dialog";
 import { cn } from "../../../lib/utils";
 import { useRouter } from "next/navigation";
@@ -29,26 +29,19 @@ export const ChooseProductModal: React.FC<Props> = ({ product, className }) => {
           "p-6 w-[1060px] max-w-[1060px] min-h-[100px] bg-white rounded-lg overflow-hidden",
           className
         )}
-        
       >
-        
-
-        
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold mb-1">
             {product.name}
           </DialogTitle>
         </DialogHeader>
 
-        {/* --- КІНЕЦЬ ЗМІН --- */}
-
-        {/* Ваша логіка для вибору форми залишається незмінною */}
         {isPizzaForm ? (
           <ChoosePizzaForm
             imageUrl={product.imageUrl}
             name={product.name}
             ingredients={product.ingredients}
-            
+            items={product.items}
           />
         ) : (
           <ChooseProductForm imageUrl={product.imageUrl} name={product.name} />

@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Container } from "./container";
 import Image from "next/image";
@@ -28,11 +27,8 @@ export const Header: React.FC<Props> = ({ className }) => {
         </Link>
 
         <div className="mx-10 flex-1">
-            <SearchInput /> 
-            </div>
-
-        
-
+          <SearchInput />
+        </div>
 
         {/* Права частина */}
         <div className="flex items-center gap-3">

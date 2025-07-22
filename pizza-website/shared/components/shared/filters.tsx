@@ -7,7 +7,6 @@ import { RangeSlider } from "./range-slider";
 import { CheckboxFiltersGroup } from "./checkbox-filters-group";
 import { useFilters, useIngredients, useQueryFilters } from "../../hooks";
 
-
 interface Props {
   className?: string;
 }
@@ -24,9 +23,10 @@ export const Filters: React.FC<Props> = ({ className }) => {
     text: item.name,
   }));
 
-  const updatePrices = (prices: number[]) => {
-    filters.setPrices("priceFrom", prices[0]);
-    filters.setPrices("priceTo", prices[1]);
+ const updatePrices = (prices: number[]) => {
+    console.log(prices, 999);
+    filters.setPrices('priceFrom', prices[0]);
+    filters.setPrices('priceTo', prices[1]);
   };
 
   return (
@@ -92,10 +92,7 @@ export const Filters: React.FC<Props> = ({ className }) => {
           min={0}
           max={400}
           step={10}
-          value={[
-            filters.prices.priceFrom || 0,
-            filters.prices.priceTo || 400,
-          ]}
+          value={[filters.prices.priceFrom || 0, filters.prices.priceTo || 400]}
           onValueChange={updatePrices}
         />
       </div>
