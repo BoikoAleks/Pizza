@@ -8,13 +8,14 @@ import { cn } from "../../lib/utils";
 import {
   mapPizzaType,
   PizzaSize,
-  pizzaSizes,
   PizzaType,
   pizzaTypes,
 } from "../../constants/pizza";
 import { IngredientItem } from "./ingredient-item";
 import { Ingredient, ProductItem } from "@prisma/client";
 import { useSet } from "react-use";
+import { calcTotalPizzaPrice } from "@/shared/lib";
+import { usePizzaOptions } from "@/shared/hooks";
 
 interface Props {
   imageUrl: string;
@@ -33,40 +34,16 @@ export const ChoosePizzaForm: React.FC<Props> = ({
   items,
   onClickAddCart,
 }) => {
-  const [size, setSize] = React.useState<PizzaSize>(20);
-  const [type, setType] = React.useState<PizzaType>(1);
+  const {
+    size,
+    type,
+    availableSizes: availablePizzaSizes,
+    setType,
+    setSize,
+    addIngredient,
+  } = usePizzaOptions(items);
 
-  const [selectedIngredients, { toggle: addIngredient }] = useSet(
-    new Set<number>([])
-  );
-
-  const pizzaPrice =
-    items.find((item) => item.pizzaType === type && item.size === size)
-      ?.price || 0;
-  const totalIngredientsPrice = ingredients
-    .filter((ingredient) => selectedIngredients.has(ingredient.id))
-    .reduce((acc, ingredient) => acc + ingredient.price, 0);
-
-  const totalPrice = pizzaPrice + totalIngredientsPrice;
-
-  const handleClickAdd = () => {
-    onClickAddCart?.();
-    console.log({
-      size,
-      type,
-      ingredients: selectedIngredients,
-    });
-  };
-
-  const availablePizza = items.filter((item) => item.pizzaType === type);
-  const availablePizzaSizes = pizzaSizes.map((item) => ({
-    name: item.name,
-    value: item.value,
-    label: `${item} см`,
-    disabled: !availablePizza.some(
-      (pizza) => Number(pizza.size) === Number(item.value)
-    ),
-  }));
+  
 
   React.useEffect(() => {
     const isAvailableSize = availablePizzaSizes.find(
@@ -79,7 +56,14 @@ export const ChoosePizzaForm: React.FC<Props> = ({
     }
   }, [type]);
 
-  const textDetails = `${size} см, ${mapPizzaType[type]} піца`;
+  const handleClickAdd = () => {
+    onClickAddCart?.();
+    console.log({
+      size,
+      type,
+      ingredients: selectedIngredients,
+    });
+  };
 
   return (
     <div className={cn(className, "flex flex-1")}>
