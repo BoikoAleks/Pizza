@@ -13,7 +13,7 @@ interface QueryFilters extends PriceProps {
   ingredients: string;
 }
 
- export interface Filters {
+export interface Filters {
   sizes: Set<string>;
   pizzaTypes: Set<string>;
   selectedIngredients: Set<string>;
@@ -54,8 +54,8 @@ export const useFilters = (): ReturnProps => {
   );
   // Фільтр для ціни
   const [prices, setPrices] = React.useState<PriceProps>({
-    priceFrom: Number(searchParams.get("priceFrom")) ,
-    priceTo: Number(searchParams.get("priceTo"))  ,
+    priceFrom: Number(searchParams.get("priceFrom")),
+    priceTo: Number(searchParams.get("priceTo")),
   });
 
   const updatePrice = (name: keyof PriceProps, value: number) => {

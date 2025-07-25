@@ -1,3 +1,5 @@
+"use client";
+
 import React from "react";
 import { Title } from "./title";
 import { Button } from "../ui";
@@ -5,17 +7,12 @@ import { PizzaImage } from "./pizza-image";
 import { GroupVariants } from "./group-variants";
 
 import { cn } from "../../lib/utils";
-import {
-  mapPizzaType,
-  PizzaSize,
-  PizzaType,
-  pizzaTypes,
-} from "../../constants/pizza";
+import { PizzaSize, PizzaType, pizzaTypes } from "../../constants/pizza";
 import { IngredientItem } from "./ingredient-item";
 import { Ingredient, ProductItem } from "@prisma/client";
-import { useSet } from "react-use";
-import { calcTotalPizzaPrice } from "@/shared/lib";
+
 import { usePizzaOptions } from "@/shared/hooks";
+import { getPizzaDetails } from "@/shared/lib";
 
 interface Props {
   imageUrl: string;
@@ -28,28 +25,35 @@ interface Props {
 
 export const ChoosePizzaForm: React.FC<Props> = ({
   name,
-  imageUrl,
-  className,
-  ingredients,
   items,
+  imageUrl,
+  ingredients,
   onClickAddCart,
+  className,
 }) => {
   const {
     size,
     type,
-    availableSizes: availablePizzaSizes,
-    setType,
+    selectedIngredients,
     setSize,
+    setType,
     addIngredient,
+    availableSizes,
   } = usePizzaOptions(items);
 
-  
+  const { totalPrice, textDetails } = getPizzaDetails(
+    type,
+    size,
+    items,
+    ingredients,
+    selectedIngredients
+  );
 
   React.useEffect(() => {
-    const isAvailableSize = availablePizzaSizes.find(
+    const isAvailableSize = availableSizes.find(
       (item) => Number(item.value) === size && !item.disabled
     );
-    const availableSize = availablePizzaSizes?.find((item) => !item.disabled);
+    const availableSize = availableSizes?.find((item) => !item.disabled);
 
     if (!isAvailableSize && availableSize) {
       setSize(Number(availableSize.value) as PizzaSize);
@@ -76,7 +80,7 @@ export const ChoosePizzaForm: React.FC<Props> = ({
 
         <div className="flex flex-col gap-4 mt-5">
           <GroupVariants
-            items={availablePizzaSizes}
+            items={availableSizes}
             value={String(size)}
             onClick={(value) => setSize(Number(value) as PizzaSize)}
           />

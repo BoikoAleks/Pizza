@@ -1,7 +1,6 @@
 import { Ingredient, ProductItem } from '@prisma/client';
 import { PizzaSize, PizzaType } from '../constants/pizza';
 
-
 /**
  * Функция для подсчета общей стоимости пиццы
  *
@@ -14,7 +13,11 @@ import { PizzaSize, PizzaType } from '../constants/pizza';
  * @returns number общую стоимость
  */
 export const calcTotalPizzaPrice = (
-type: number, size: number, items: { id: number; price: number; size: number | null; pizzaType: number | null; productId: number; }[], ingredients: { name: string; id: number; price: number; imageUrl: string; createdAt: Date; updatedAt: Date; }[], type: PizzaType, size: PizzaSize, addIngredient: (key: number) => void, selectedIngredients: Set<number>, items: ProductItem[], ingredients: Ingredient[], selectedIngredients: Set<number>,
+  type: PizzaType,
+  size: PizzaSize,
+  items: ProductItem[],
+  ingredients: Ingredient[],
+  selectedIngredients: Set<number>,
 ) => {
   const pizzaPrice =
     items.find((item) => item.pizzaType === type && item.size === size)?.price || 0;
