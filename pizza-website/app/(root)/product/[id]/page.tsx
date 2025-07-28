@@ -39,7 +39,7 @@ export default async function ProductPage({
             className="font-extrabold mb-1"
           />
 
-          <p className="text-gray-400">text Details</p>
+          <p className="text-gray-[400]">text Details</p>
 
           <GroupVariants
             value="1"

@@ -1,5 +1,3 @@
-/* eslint-disable react/jsx-no-undef */
-
 import { Trash2Icon } from "lucide-react";
 import { CountButton } from "./count-button";
 import * as CartItem from "./cart-item-details";
@@ -13,6 +11,7 @@ interface Props extends CartItemProps {
 }
 
 export const CartDrawerItem: React.FC<Props> = ({
+  
   imageUrl,
   name,
   price,
@@ -20,6 +19,7 @@ export const CartDrawerItem: React.FC<Props> = ({
   disabled,
   onClickCountButton,
   onClickRemove,
+  details,
   className,
 }) => {
   return (
@@ -35,7 +35,7 @@ export const CartDrawerItem: React.FC<Props> = ({
       <CartItem.Image src={imageUrl} />
 
       <div className="flex-1">
-        <CartItem.Info name={name} />
+        <CartItem.Info name={name} details={details} />
 
         <hr className="my-3" />
 

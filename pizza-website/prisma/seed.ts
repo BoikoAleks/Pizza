@@ -60,6 +60,7 @@ async function up() {
   const dbCategories = await prisma.category.findMany();
   const pizzaCategoryId = dbCategories.find(c => c.name === "Піца")!.id;
   const drinksCategoryId = dbCategories.find(c => c.name === "Напої")!.id;
+  
 
   // 3. Інгредієнти
   await prisma.ingredient.createMany({ data: ingredients });
