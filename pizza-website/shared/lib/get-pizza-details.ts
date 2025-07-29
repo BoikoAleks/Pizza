@@ -16,7 +16,7 @@ export const getPizzaDetails = (
     ingredients,
     selectedIngredients,
   );
-  const textDetails = `${size} см, ${mapPizzaType[type]} піца`;
+  const textDetails = `${size} см, ${mapPizzaType[type]} бортик`;
 
   return { totalPrice, textDetails };
 };

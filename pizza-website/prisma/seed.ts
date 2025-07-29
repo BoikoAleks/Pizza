@@ -59,7 +59,14 @@ async function up() {
   await prisma.category.createMany({ data: categories });
   const dbCategories = await prisma.category.findMany();
   const pizzaCategoryId = dbCategories.find(c => c.name === "Піца")!.id;
+  const breakfastCategoryId = dbCategories.find(c => c.name === "Сніданки")!.id;
+  const saladsCategoryId = dbCategories.find(c => c.name === "Салати")!.id;
+  const snacksCategoryId = dbCategories.find(c => c.name === "Закуски")!.id;
+  const cocktailsCategoryId = dbCategories.find(c => c.name === "Коктейлі")!.id;
+  const coffeeCategoryId = dbCategories.find(c => c.name === "Кава")!.id;
   const drinksCategoryId = dbCategories.find(c => c.name === "Напої")!.id;
+  const dessertsCategoryId = dbCategories.find(c => c.name === "Десерти")!.id;
+
   
 
   // 3. Інгредієнти
@@ -72,6 +79,56 @@ async function up() {
       categoryId: drinksCategoryId,
     })),
   });
+
+ // 4. Напої та інші продукти з constants
+  await prisma.product.createMany({
+    data: products.map(p => ({
+      ...p,
+      categoryId: breakfastCategoryId,
+    })),
+  });
+
+  // 4. Напої та інші продукти з constants
+  await prisma.product.createMany({
+    data: products.map(p => ({
+      ...p,
+      categoryId: saladsCategoryId,
+    })),
+  });
+
+  // 4. Напої та інші продукти з constants
+  await prisma.product.createMany({
+    data: products.map(p => ({
+      ...p,
+      categoryId: snacksCategoryId,
+    })),
+  });
+
+  // 4. Напої та інші продукти з constants
+  await prisma.product.createMany({
+    data: products.map(p => ({
+      ...p,
+      categoryId: cocktailsCategoryId,
+    })),
+  });
+
+  // 4. Напої та інші продукти з constants
+  await prisma.product.createMany({
+    data: products.map(p => ({
+      ...p,
+      categoryId: coffeeCategoryId,
+    })),
+  });
+
+  // 4. Напої та інші продукти з constants
+  await prisma.product.createMany({
+    data: products.map(p => ({
+      ...p,
+      categoryId: dessertsCategoryId,
+    })),
+  });
+  
+
 
   // 5. Піци з інгредієнтами
   const pizza1 = await prisma.product.create({

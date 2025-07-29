@@ -17,7 +17,7 @@ export default async function ProductPage({
   // Дістаємо `id` з `params` вже всередині функції
   const { id } = params;
 
-// --- КІНЕЦЬ ВИПРАВЛЕННЯ ---
+// --- КІНЕЦЬ ВИПРАВЛЕННЯ111 ---
 
   const product = await prisma.product.findFirst({
     where: { id: Number(id) },
