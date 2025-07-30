@@ -6,9 +6,7 @@ import { Container, Title } from "@/shared/components/shared";
 import { PizzaImage } from "@/shared/components/shared/pizza-image";
 import { GroupVariants } from "@/shared/components/shared/group-variants";
 
-// --- ПОЧАТОК ВИПРАВЛЕННЯ ---
 
-// Приймаємо `params` як цілий об'єкт
 export default async function ProductPage({
   params,
 }: {

@@ -6,6 +6,14 @@ import { XIcon } from "lucide-react";
 
 import { cn } from "../../lib/utils";
 
+// Типи для розмірів
+type DialogSize = "sm" | "md" | "lg" | "xl" | "2xl" | "3xl" | "4xl" | "5xl";
+
+// Оновлюємо інтерфейс пропсів
+interface DialogContentProps extends React.ComponentProps<typeof DialogPrimitive.Content> {
+  size?: DialogSize;
+}
+
 function Dialog({
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Root>) {
@@ -49,15 +57,27 @@ function DialogOverlay({
 function DialogContent({
   className,
   children,
+  size = "lg", // Розмір за замовчуванням
   ...props
-}: React.ComponentProps<typeof DialogPrimitive.Content>) {
+}: DialogContentProps) {
   return (
-    <DialogPortal data-slot="dialog-portal">
+    <DialogPortal>
       <DialogOverlay />
       <DialogPrimitive.Content
         data-slot="dialog-content"
         className={cn(
-          "bg-background data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-lg border p-6 shadow-lg duration-200 sm:max-w-lg",
+          "bg-background data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 fixed top-[50%] left-[50%] z-50 grid w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-lg border shadow-lg duration-200",
+          // Динамічно застосовуємо максимальну ширину
+          {
+            "sm:max-w-sm": size === "sm",
+            "sm:max-w-md": size === "md",
+            "sm:max-w-lg": size === "lg",
+            "sm:max-w-xl": size === "xl",
+            "sm:max-w-2xl": size === "2xl",
+            "sm:max-w-3xl": size === "3xl",
+            "sm:max-w-4xl": size === "4xl",
+            "sm:max-w-5xl": size === "5xl",
+          },
           className
         )}
         {...props}
@@ -72,54 +92,12 @@ function DialogContent({
   );
 }
 
-function DialogHeader({ className, ...props }: React.ComponentProps<"div">) {
-  return (
-    <div
-      data-slot="dialog-header"
-      className={cn("flex flex-col gap-2 text-center sm:text-left", className)}
-      {...props}
-    />
-  );
-}
+// ... (DialogHeader, DialogFooter, DialogTitle, DialogDescription залишаються без змін)
+function DialogHeader({ className, ...props }: React.ComponentProps<"div">) { return (<div data-slot="dialog-header" className={cn("flex flex-col gap-2 text-center sm:text-left", className)} {...props} />); }
+function DialogFooter({ className, ...props }: React.ComponentProps<"div">) { return (<div data-slot="dialog-footer" className={cn("flex flex-col-reverse gap-2 sm:flex-row sm:justify-end", className)} {...props} />); }
+function DialogTitle({ className, ...props }: React.ComponentProps<typeof DialogPrimitive.Title>) { return (<DialogPrimitive.Title data-slot="dialog-title" className={cn("text-lg leading-none font-semibold", className)} {...props} />); }
+function DialogDescription({ className, ...props }: React.ComponentProps<typeof DialogPrimitive.Description>) { return (<DialogPrimitive.Description data-slot="dialog-description" className={cn("text-muted-foreground text-sm", className)} {...props} />); }
 
-function DialogFooter({ className, ...props }: React.ComponentProps<"div">) {
-  return (
-    <div
-      data-slot="dialog-footer"
-      className={cn(
-        "flex flex-col-reverse gap-2 sm:flex-row sm:justify-end",
-        className
-      )}
-      {...props}
-    />
-  );
-}
-
-function DialogTitle({
-  className,
-  ...props
-}: React.ComponentProps<typeof DialogPrimitive.Title>) {
-  return (
-    <DialogPrimitive.Title
-      data-slot="dialog-title"
-      className={cn("text-lg leading-none font-semibold", className)}
-      {...props}
-    />
-  );
-}
-
-function DialogDescription({
-  className,
-  ...props
-}: React.ComponentProps<typeof DialogPrimitive.Description>) {
-  return (
-    <DialogPrimitive.Description
-      data-slot="dialog-description"
-      className={cn("text-muted-foreground text-sm", className)}
-      {...props}
-    />
-  );
-}
 
 export {
   Dialog,

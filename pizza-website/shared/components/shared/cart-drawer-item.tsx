@@ -1,5 +1,3 @@
-
-
 import { Trash2Icon } from "lucide-react";
 import { CountButton } from "./count-button";
 import * as CartItem from "./cart-item-details";
@@ -13,7 +11,6 @@ interface Props extends CartItemProps {
 }
 
 export const CartDrawerItem: React.FC<Props> = ({
-  
   imageUrl,
   name,
   price,

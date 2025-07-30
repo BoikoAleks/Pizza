@@ -1,3 +1,4 @@
+
 import {
   Cart,
   CartItem,
@@ -18,5 +19,8 @@ export interface CartDTO extends Cart {
 
 export interface CreateCartItemValues {
   productItemId: number;
-  ingredients?: number[];
+  ingredientsIds?: number[];
+  quantity: number;
+  PizzaType?: number;
+  PizzaSize?: number;
 }

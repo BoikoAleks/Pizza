@@ -32,10 +32,10 @@ export default async function Home() {
         )}
       />
 
-      <Container className=" mt-10 pb-14">
-        <div className="flex gap-[80px]">
+      <Container className=" mt-9 pb-5">
+        <div className="flex gap-56">
           {/* Фільтрація*/}
-          <div className="w-[250px]">
+          <div className="w-44">
             <Filters />
           </div>
 
