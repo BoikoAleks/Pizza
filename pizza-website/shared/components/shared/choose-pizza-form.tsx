@@ -19,15 +19,43 @@ interface Props {
   className?: string;
   ingredients: Ingredient[];
   items: ProductItem[];
-  onClickAddCart?: VoidFunction;
+  onSubmit: (itemId: number, ingredients: number[]) => void;
 }
 
-export const ChoosePizzaForm: React.FC<Props> = ({ name, items, imageUrl, ingredients, onClickAddCart, className }) => {
-  const { size, type, selectedIngredients, setSize, setType, addIngredient, availableSizes } = usePizzaOptions(items);
-  const { totalPrice, textDetails } = getPizzaDetails(type, size, items, ingredients, selectedIngredients);
+/**
+ * Форма вибору піци
+ */
+
+export const ChoosePizzaForm: React.FC<Props> = ({
+  name,
+  items,
+  imageUrl,
+  ingredients,
+  onSubmit,
+  className,
+}) => {
+  const {
+    size,
+    type,
+    selectedIngredients,
+    setSize,
+    currentItemId,
+    setType,
+    addIngredient,
+    availableSizes,
+  } = usePizzaOptions(items);
+  const { totalPrice, textDetails } = getPizzaDetails(
+    type,
+    size,
+    items,
+    ingredients,
+    selectedIngredients
+  );
 
   React.useEffect(() => {
-    const isAvailableSize = availableSizes.find((item) => Number(item.value) === size && !item.disabled);
+    const isAvailableSize = availableSizes.find(
+      (item) => Number(item.value) === size && !item.disabled
+    );
     const availableSize = availableSizes?.find((item) => !item.disabled);
 
     if (!isAvailableSize && availableSize) {
@@ -35,7 +63,11 @@ export const ChoosePizzaForm: React.FC<Props> = ({ name, items, imageUrl, ingred
     }
   }, [type, setSize, size, availableSizes]);
 
-  const handleClickAdd = () => { onClickAddCart?.(); };
+  const handleClickAdd = () => {
+    if (currentItemId) {
+      onSubmit(currentItemId, Array.from(selectedIngredients));
+    }
+  };
 
   return (
     <div className={cn(className, "flex w-full")}>
@@ -46,27 +78,48 @@ export const ChoosePizzaForm: React.FC<Props> = ({ name, items, imageUrl, ingred
       <div className="flex-1 bg-gray-50 p-8 flex flex-col">
         <div className="flex-1 overflow-y-auto pr-2">
           <DialogHeader>
-            <DialogTitle className="text-3xl font-bold mb-1">{name}</DialogTitle>
+            <DialogTitle className="text-3xl font-bold mb-1">
+              {name}
+            </DialogTitle>
           </DialogHeader>
 
           <p className="text-gray-400 mt-2">{textDetails}</p>
 
           <div className="flex flex-col gap-4 mt-5">
-            <GroupVariants items={availableSizes} value={String(size)} onClick={(value) => setSize(Number(value) as PizzaSize)} />
-            <GroupVariants items={pizzaTypes} value={String(type)} onClick={(value) => setType(Number(value) as PizzaType)} />
+            <GroupVariants
+              items={availableSizes}
+              value={String(size)}
+              onClick={(value) => setSize(Number(value) as PizzaSize)}
+            />
+            <GroupVariants
+              items={pizzaTypes}
+              value={String(type)}
+              onClick={(value) => setType(Number(value) as PizzaType)}
+            />
           </div>
 
           <div className="mt-8">
-            <Title text="Додати інгредієнти" size="sm" className="mb-4 font-bold" />
+            <Title
+              text="Додати інгредієнти"
+              size="sm"
+              className="mb-4 font-bold"
+            />
           </div>
 
           <div className="grid grid-cols-3 gap-3 mt-4">
             {ingredients.map((ingredient) => (
-              <IngredientItem key={ingredient.id} name={ingredient.name} imageUrl={ingredient.imageUrl} price={ingredient.price} onClick={() => addIngredient(ingredient.id)} active={selectedIngredients.has(ingredient.id)} />
+              <IngredientItem
+                key={ingredient.id}
+                name={ingredient.name}
+                imageUrl={ingredient.imageUrl}
+                price={ingredient.price}
+                onClick={() => addIngredient(ingredient.id)}
+                active={selectedIngredients.has(ingredient.id)}
+              />
             ))}
           </div>
         </div>
-        
+
         <div className="mt-auto pt-8">
           <Button onClick={handleClickAdd} className="h-14 text-base w-full">
             Додати до кошика за {totalPrice} грн

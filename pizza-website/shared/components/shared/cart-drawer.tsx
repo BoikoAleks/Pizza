@@ -55,11 +55,10 @@ export const CartDrawer: React.FC<React.PropsWithChildren<Props>> = ({
         </SheetHeader>
 
         {/* товари в корзині */}
-        <div className="-mx-6 mt-5 overflow-auto scrollbar flex-1">
-          <div className="mb-2">
-            {items.map((item) => (
+        <div className="-mx-0.3 mt-5 overflow-auto scrollbar flex-1 ">
+          {items.map((item) => (
+            <div key={item.id} className="mb-2">
               <CartDrawerItem
-                key={item.id}
                 id={item.id}
                 imageUrl={item.imageUrl}
                 details={
@@ -70,7 +69,7 @@ export const CartDrawer: React.FC<React.PropsWithChildren<Props>> = ({
                         item.pizzaSize as PizzaSize
                       )
                     : ""
-                }
+                } 
                 name={item.name}
                 price={item.price}
                 quantity={item.quantity}
@@ -79,8 +78,8 @@ export const CartDrawer: React.FC<React.PropsWithChildren<Props>> = ({
                 }
                 onClickRemove={() => removeCartItem(item.id)}
               />
-            ))}
-          </div>
+            </div>
+          ))}
         </div>
         {/* футер корзини */}
         <SheetFooter className="-mx-0.3 bg-white p-8">
