@@ -3,7 +3,7 @@
 import React from "react";
 import { useRouter } from "next/navigation";
 import { ProductWithRelations } from "@/@types/prisma";
-import { Dialog, DialogContent } from "../../ui/dialog";
+import { Dialog, DialogContent, DialogTitle} from "../../ui/dialog";
 import { ChoosePizzaForm } from "../choose-pizza-form";
 import { ChooseProductForm } from "../choose-product-form";
 import { cn } from "@/shared/lib/utils";
@@ -37,6 +37,7 @@ export const ChooseProductModal: React.FC<Props> = ({ product, className }) => {
   return (
     <Dialog open={Boolean(product)} onOpenChange={() => router.back()}>
       <DialogContent size="4xl" className={cn("p-0", className)}>
+        <DialogTitle className="bg-white"></DialogTitle>
         {isPizzaForm ? (
           <ChoosePizzaForm
             imageUrl={product.imageUrl}
@@ -50,10 +51,11 @@ export const ChooseProductModal: React.FC<Props> = ({ product, className }) => {
             imageUrl={product.imageUrl}
             name={product.name}
             onSubmit={onAddProduct}
-            price={firstItem.price}
+            price={firstItem?.price}
           />
         )}
       </DialogContent>
     </Dialog>
+    
   );
 };

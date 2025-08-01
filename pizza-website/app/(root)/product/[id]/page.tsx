@@ -7,15 +7,8 @@ import { PizzaImage } from "@/shared/components/shared/pizza-image";
 import { GroupVariants } from "@/shared/components/shared/group-variants";
 
 
-export default async function ProductPage({
-  params,
-}: {
-  params: { id: string };
-}) {
-  // Дістаємо `id` з `params` вже всередині функції
-  const { id } = params;
-
-// --- КІНЕЦЬ ВИПРАВЛЕННЯ111 ---
+export default async function ProductPage( props: { params: { id: string } }) { 
+  const { id } = await props.params;
 
   const product = await prisma.product.findFirst({
     where: { id: Number(id) },
