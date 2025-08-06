@@ -20,18 +20,20 @@ export const ProductCard: React.FC<Props> = ({
   imageUrl,
   className,
 }) => {
-
   return (
     <div className={className}>
       <Link href={`/product/${id}`}>
-        <div className="flex justify-center p-6 bg-secondary rounded-lg h-[250px]">
-          <Image
-            width={200}
-            height={200}
-            src={imageUrl || "/placeholder.png"}
-            alt={name}
-            className="w-[500px] h-[200px] object-contain transition-all duration-300"
-          />
+        <div className="flex justify-center items-center p-6 bg-secondary rounded-lg h-[250px] overflow-hidden">
+          <div className="relative w-full h-full">
+            {" "}
+            <Image
+              src={imageUrl || "/placeholder.png"}
+              alt={name}
+              fill
+              className="object-contain transition-all duration-300"
+              sizes="(max-width: 640px) 90vw, (max-width: 1024px) 33vw, 25vw"
+            />
+          </div>
         </div>
 
         <Title text={name} size="sm" className="mb-1 mt-3 font-bold" />
@@ -41,7 +43,6 @@ export const ProductCard: React.FC<Props> = ({
           італійські трави
         </p>
       </Link>
-      
 
       <div className="flex items-center justify-between mt-4">
         <span className="text-[20px]">

@@ -37,7 +37,7 @@ export const ProductGroupList: React.FC<Props> = ({
   const setActiveCategoryId = useCategoryStore((state) => state.setActiveId);
 
   // 2. Вказано тип елемента для ref (`HTMLDivElement`), до якого він буде прив'язаний
-  const intersectionRef = React.useRef(null);
+  const intersectionRef = React.useRef(null as unknown as HTMLDivElement);
 
   const intersection = useIntersection(intersectionRef, {
     threshold: 0.4,

@@ -1,13 +1,10 @@
-// app/(root)/product/[id]/page.tsx - ВИПРАВЛЕНА ВЕРСІЯ
-
 import { notFound } from "next/navigation";
 import { prisma } from "@/prisma/prisma-client";
 import { Container, Title } from "@/shared/components/shared";
 import { PizzaImage } from "@/shared/components/shared/pizza-image";
 import { GroupVariants } from "@/shared/components/shared/group-variants";
 
-
-export default async function ProductPage( props: { params: { id: string } }) { 
+export default async function ProductPage(props: { params: { id: string } }) {
   const { id } = await props.params;
 
   const product = await prisma.product.findFirst({

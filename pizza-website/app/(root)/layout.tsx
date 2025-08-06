@@ -1,5 +1,6 @@
 import { Header } from "@/shared/components/shared";
 import { Metadata } from "next";
+import { Toaster } from "react-hot-toast";
 
 export const metadata: Metadata = {
   title: "Pizza Website",
@@ -7,7 +8,6 @@ export const metadata: Metadata = {
 
 export default function HomeLayout({
   children,
-  modal,
 }: Readonly<{
   children: React.ReactNode;
   modal: React.ReactNode;
@@ -17,7 +17,7 @@ export default function HomeLayout({
     <main className="min-h-screen">
       <Header />
       {children}
-      {modal}
+      <Toaster />
     </main>
   );
 }
