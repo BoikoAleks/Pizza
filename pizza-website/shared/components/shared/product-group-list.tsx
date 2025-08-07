@@ -1,27 +1,16 @@
 "use client";
+
 import { useCategoryStore } from "@/shared/store/category";
 import React from "react";
 import { useIntersection } from "react-use";
 import { Title } from "@/shared/components/shared/title";
 import { ProductCard } from "./product-card";
 import { cn } from "@/shared/lib/utils";
-
-
-// 1. Створено типи для продукту, щоб позбутися `any`
-interface IProductItem {
-  price: number;
-}
-
-interface IProduct {
-  id: number;
-  name: string;
-  imageUrl: string;
-  items: IProductItem[];
-}
+import { ProductWithRelations } from "@/@types/prisma";
 
 interface Props {
   title: string;
-  items: IProduct[]; // Використано сильний тип замість `any[]`
+  items: ProductWithRelations[];
   className?: string;
   listClassName?: string;
   categoryId: number;
@@ -36,7 +25,6 @@ export const ProductGroupList: React.FC<Props> = ({
 }) => {
   const setActiveCategoryId = useCategoryStore((state) => state.setActiveId);
 
-  // 2. Вказано тип елемента для ref (`HTMLDivElement`), до якого він буде прив'язаний
   const intersectionRef = React.useRef(null as unknown as HTMLDivElement);
 
   const intersection = useIntersection(intersectionRef, {
@@ -50,7 +38,6 @@ export const ProductGroupList: React.FC<Props> = ({
   }, [intersection?.isIntersecting, categoryId, setActiveCategoryId]);
 
   return (
-    // Рекомендація: використати безпечніший id
     <div className={className} id={`group-${categoryId}`} ref={intersectionRef}>
       <Title text={title} size="lg" className="mb-5 font-extrabold" />
 
@@ -61,8 +48,8 @@ export const ProductGroupList: React.FC<Props> = ({
             id={product.id}
             name={product.name}
             imageUrl={product.imageUrl}
-            // Рекомендація: безпечний доступ до ціни
             price={product.items?.[0]?.price || 0}
+            ingredients={product.ingredients}
           />
         ))}
       </div>

@@ -1,19 +1,20 @@
-import { Container, Filters, ProductGroupList, Title, TopBar } from "@/shared/components/shared";
+import {
+  Container,
+  Filters,
+  ProductGroupList,
+  Title,
+  TopBar,
+} from "@/shared/components/shared";
 import { findPizzas, GetSearchParams } from "@/shared/lib/find-pizzas";
 import { Suspense } from "react";
 
 export default async function Home({
   searchParams,
 }: {
-  searchParams: GetSearchParams;
+  searchParams: { [key: string]: string | string[] | undefined };
 }) {
-  // Перевіряємо, чи є searchParams, і чекаємо, поки вони завантажаться
-  if (!searchParams) {
-    return <div>Loading...</div>; // Показуємо повідомлення, поки завантажуються параметри
-  }
-
-  const categories = await findPizzas(searchParams);
-
+  const plainSearchParams = await searchParams;
+  const categories = await findPizzas(plainSearchParams as GetSearchParams);
   return (
     <>
       <Container className="mt-8">

@@ -6,7 +6,7 @@ interface PriceProps {
   priceFrom?: number;
   priceTo?: number;
 }
-
+// Інтерфейс для фільтрів
 interface QueryFilters extends PriceProps {
   pizzaTypes: string;
   sizes: string;
@@ -27,6 +27,7 @@ interface ReturnProps extends Filters {
   setSelectedIngredients: (value: string) => void;
 }
 
+// Хук для фільтрів
 export const useFilters = (): ReturnProps => {
   const searchParams = useSearchParams() as unknown as Map<
     keyof QueryFilters,
@@ -34,7 +35,7 @@ export const useFilters = (): ReturnProps => {
   >;
 
   // Фільтр для інгредієнтів
-  const [selectedIngredients, { toggle: toggleIngradients }] = useSet(
+  const [selectedIngredients, { toggle: toggleIngredients }] = useSet(
     new Set<string>(searchParams.get("ingredients")?.split(","))
   );
 
@@ -57,7 +58,8 @@ export const useFilters = (): ReturnProps => {
     priceFrom: Number(searchParams.get("priceFrom")),
     priceTo: Number(searchParams.get("priceTo")),
   });
-
+  
+// Функція для оновлення ціни
   const updatePrice = (name: keyof PriceProps, value: number) => {
     setPrices((prev) => ({
       ...prev,
@@ -65,14 +67,17 @@ export const useFilters = (): ReturnProps => {
     }));
   };
 
-  return {
-    sizes,
-    pizzaTypes,
-    selectedIngredients,
-    prices,
-    setPrices: updatePrice,
-    setPizzaTypes: togglePizzaType,
-    setSizes: toggleSizes,
-    setSelectedIngredients: toggleIngradients,
-  };
+  return React.useMemo(
+    () => ({
+      sizes,
+      pizzaTypes,
+      selectedIngredients,
+      prices,
+      setPrices: updatePrice,
+      setPizzaTypes: togglePizzaType,
+      setSizes: toggleSizes,
+      setSelectedIngredients: toggleIngredients,
+    }),
+    [sizes, pizzaTypes, selectedIngredients, prices],
+  );
 };

@@ -1,17 +1,21 @@
-
-import { notFound } from "next/navigation";
 import { prisma } from "@/prisma/prisma-client";
 import { ChooseProductModal } from "@/shared/components/shared";
+import { notFound } from "next/navigation";
 
-export default async function ProductPage(props: { params: { id: string } }) {
-  const { id } = await props.params;
+export default async function ProductModalPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
 
   const product = await prisma.product.findFirst({
-    where: { id: Number(id) },
-
+    where: {
+      id: Number(id),
+    },
     include: {
-      items: true,
       ingredients: true,
+      items: true,
     },
   });
 

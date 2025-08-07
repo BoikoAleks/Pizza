@@ -11,7 +11,7 @@ import { IngredientItem } from "./ingredient-item";
 import { Ingredient, ProductItem } from "@prisma/client";
 import { usePizzaOptions } from "@/shared/hooks";
 import { getPizzaDetails } from "@/shared/lib";
-import { DialogHeader, DialogTitle } from "../ui/dialog";
+import { Dialog, DialogHeader, DialogTitle } from "../ui/dialog";
 
 interface Props {
   imageUrl: string;
@@ -79,11 +79,13 @@ export const ChoosePizzaForm: React.FC<Props> = ({
 
       <div className="flex-1 bg-gray-50 p-8 flex flex-col">
         <div className="flex-1 overflow-y-auto pr-2">
+          <Dialog> 
           <DialogHeader>
             <DialogTitle className="text-3xl font-bold mb-1">
               {name}
             </DialogTitle>
           </DialogHeader>
+          </Dialog>
 
           <p className="text-gray-400 mt-2">{textDetails}</p>
 

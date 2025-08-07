@@ -50,7 +50,7 @@ export async function PATCH(
 
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise< { id: string }> }
 ) {
   /* Пошук позиції токена*/
   try {
@@ -63,7 +63,7 @@ export async function DELETE(
     /* Пошук позиції*/
     const cartItem = await prisma.cartItem.findFirst({
       where: {
-        id: Number(params.id),
+        id: Number((await params).id),
       },
     });
     /* Перевірка наявності позиції*/
@@ -73,7 +73,7 @@ export async function DELETE(
     /* Видалення позиції з кошика*/
     await prisma.cartItem.delete({
       where: {
-        id: Number(params.id),
+        id: Number((await params).id),
       },
     });
 

@@ -3,12 +3,19 @@
 import React from "react";
 import { useRouter } from "next/navigation";
 import { ProductWithRelations } from "@/@types/prisma";
-import { Dialog, DialogContent, DialogTitle } from "../../ui/dialog";
+// 1. ІМПОРТУЄМО DialogPortal та DialogOverlay
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogPortal, 
+  DialogOverlay 
+} from "../../ui/dialog";
 import { ChoosePizzaForm } from "../choose-pizza-form";
 import { ChooseProductForm } from "../choose-product-form";
 import { cn } from "@/shared/lib/utils";
 import { useCartStore } from "@/shared/store";
 import toast from "react-hot-toast";
+import { DialogTitle } from "@radix-ui/react-dialog";
 
 interface Props {
   product: ProductWithRelations;
@@ -17,16 +24,24 @@ interface Props {
 
 export const ChooseProductModal: React.FC<Props> = ({ product, className }) => {
   const router = useRouter();
-  const firstItem = product.items[0];
-  const isPizzaForm = Boolean(product.items?.[0]?.pizzaType);
-  const [addCartItem, loading] = useCartStore((state) => [
-    state.addCartItem,
-    state.loading,
-  ]);
+  
+  // Додаємо опціональний ланцюжок для безпеки
+  const firstItem = product.items?.[0]; 
+  const isPizzaForm = Boolean(firstItem?.pizzaType);
 
-  const onSybmit = async (productItemId?: number, ingredients?: number[]) => {
+  // Виправляємо виклик useCartStore, щоб уникнути нескінченних циклів
+  const addCartItem = useCartStore((state) => state.addCartItem);
+  const loading = useCartStore((state) => state.loading);
+
+  const onSubmit = async (productItemId?: number, ingredients?: number[]) => {
     try {
-      const itemId = productItemId ?? firstItem.id;
+      // Використовуємо опціональний ланцюжок для безпеки
+      const itemId = productItemId ?? firstItem?.id;
+      
+      if (!itemId) {
+        toast.error("Не вдалося визначити товар.");
+        return;
+      }
 
       await addCartItem({
         productItemId: itemId,
@@ -41,28 +56,39 @@ export const ChooseProductModal: React.FC<Props> = ({ product, className }) => {
   };
 
   return (
-    <Dialog open={Boolean(product)} onOpenChange={() => router.back()}>
-      <DialogContent size="4xl" className={cn("p-0", className)}>
-        <DialogTitle className="bg-white"></DialogTitle>
-        {isPizzaForm ? (
-          <ChoosePizzaForm
-            imageUrl={product.imageUrl}
-            name={product.name}
-            ingredients={product.ingredients}
-            items={product.items}
-            onSubmit={onSybmit}
-            loading={loading}
-          />
-        ) : (
-          <ChooseProductForm
-            imageUrl={product.imageUrl}
-            name={product.name}
-            onSubmit={onSybmit}
-            price={firstItem?.price}
-            loading={loading}
-          />
-        )}
-      </DialogContent>
+    <Dialog open={true} onOpenChange={(isOpen) => {
+      if (!isOpen) {
+        router.back();
+      }
+    }}>
+      {/* 2. ДОДАЄМО ПОРТАЛ. Все, що всередині, буде "телепортовано" */}
+      <DialogPortal>
+        {/* 3. ДОДАЄМО ОВЕРЛЕЙ для затемнення фону */}
+        <DialogOverlay />
+
+        <DialogContent size="4xl" className={cn("p-0", className)}>
+          <DialogTitle> 
+          {isPizzaForm ? (
+            <ChoosePizzaForm
+              imageUrl={product.imageUrl}
+              name={product.name}
+              ingredients={product.ingredients}
+              items={product.items}
+              onSubmit={onSubmit}
+              loading={loading}
+            />
+          ) : (
+            <ChooseProductForm
+              imageUrl={product.imageUrl}
+              name={product.name}
+              onSubmit={onSubmit}
+              price={firstItem?.price}
+              loading={loading}
+            />
+          )}
+          </DialogTitle>
+        </DialogContent>
+      </DialogPortal>
     </Dialog>
   );
 };

@@ -8,6 +8,7 @@ export const metadata: Metadata = {
 
 export default function HomeLayout({
   children,
+  modal,
 }: Readonly<{
   children: React.ReactNode;
   modal: React.ReactNode;
@@ -15,9 +16,11 @@ export default function HomeLayout({
   return (
     // Просто повертаємо контент, який буде вкладено в кореневий layout
     <main className="min-h-screen">
-      <Header />
+      
       {children}
-      <Toaster />
+      {modal}
+      
+      
     </main>
   );
 }

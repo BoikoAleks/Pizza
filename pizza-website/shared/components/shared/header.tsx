@@ -14,15 +14,15 @@ interface Props {
 
 export const Header: React.FC<Props> = ({ className }) => {
   return (
-    <header className={cn("border border-b", className)}>
+    <header className={cn(" border-gray-300", className)}>
       <Container className="flex items-center justify-between py-8">
         {/* Ліва частина */}
         <Link href="/">
           <div className="flex items-center gap-4">
-            <Image src="/logo.png" alt="Logo" width={32} height={32} />
+            <Image src="/logo.png" alt="Logo" width={40} height={40} />
             <div>
               <h1 className="text-2xl uppercase font-black">Republic </h1>
-              {/* <p className="text-sm text-gray-400 leading-3">смачніше просто немає</p> */}
+               <p className="text-sm text-gray-400 leading-3">смачніше просто немає</p> 
             </div>
           </div>
         </Link>
