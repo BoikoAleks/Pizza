@@ -50,11 +50,11 @@ export async function PATCH(
 
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: Promise< { id: string }> }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   /* Пошук позиції токена*/
   try {
-    
+
     const token = req.cookies.get("cartToken")?.value;
 
     if (!token) {

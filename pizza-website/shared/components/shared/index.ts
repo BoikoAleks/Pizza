@@ -16,5 +16,6 @@ export { ProductGroupList } from "./product-group-list";
 export { ChooseProductModal } from "./modals";
 export { CartButton } from "./cart-button";
 export { CartDrawer } from "./cart-drawer";
+export { WhiteBlock} from "./white-block";
 export * from "./modals";
 
