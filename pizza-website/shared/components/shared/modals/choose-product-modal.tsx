@@ -1,17 +1,11 @@
-"use client";
+'use client';
 
-import {
-  Dialog,
-  DialogContent,
-  DialogOverlay,
-  DialogPortal,
-  DialogTitle,
-} from "@/shared/components/ui/dialog";
-import { cn } from "@/shared/lib/utils";
-import React from "react";
-import { useRouter } from "next/navigation";
-import { ProductWithRelations } from "@/@types/prisma";
-import { ProductForm } from "../product-form";
+import { Dialog, DialogContent } from '@/shared/components/ui/dialog';
+import { cn } from '@/shared/lib/utils';
+import React from 'react';
+import { useRouter } from 'next/navigation';
+import { ProductWithRelations } from '@/@types/prisma';
+import { ProductForm } from '../product-form';
 
 interface Props {
   product: ProductWithRelations;
@@ -23,17 +17,13 @@ export const ChooseProductModal: React.FC<Props> = ({ product, className }) => {
 
   return (
     <Dialog open={Boolean(product)} onOpenChange={() => router.back()}>
-      <DialogPortal>
-        <DialogOverlay />
-        <DialogContent
-          size="4xl"
-          className={cn("inline-flex gap-1 bg-gray-50 p-0", className)}
-        >
-          <DialogTitle>
-            <ProductForm product={product} onSubmit={() => router.back()} />
-          </DialogTitle>
-        </DialogContent>
-      </DialogPortal>
+      <DialogContent
+        className={cn(
+          'p-0 w-[1060px] max-w-[1060px] min-h-[500px] bg-white overflow-hidden',
+          className,
+        )}>
+        <ProductForm product={product} onSubmit={() => router.back()} />
+      </DialogContent>
     </Dialog>
   );
 };

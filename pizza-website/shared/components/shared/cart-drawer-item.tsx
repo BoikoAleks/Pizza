@@ -15,7 +15,6 @@ export const CartDrawerItem: React.FC<Props> = ({
   name,
   price,
   quantity,
-  disabled,
   onClickCountButton,
   onClickRemove,
   details,
@@ -25,9 +24,7 @@ export const CartDrawerItem: React.FC<Props> = ({
     <div
       className={cn(
         "flex bg-white p-5 gap-6",
-        {
-          "opacity-50 pointer-events-none": disabled,
-        },
+
         className
       )}
     >
