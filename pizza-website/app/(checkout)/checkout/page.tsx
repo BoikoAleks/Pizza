@@ -10,9 +10,15 @@ import {
   CheckoutPersonalForm,
 } from "@/shared/components/shared/checkout";
 import { checkoutFormSchema, CheckoutFormValues } from "@/shared/constants";
+import { createOrder } from "@/app/actions";
+import { ErrorIcon, toast } from "react-hot-toast";
+import { CheckIcon } from "lucide-react";
+import { useState } from "react";
 
 export default function CheckoutPage() {
-  const { totalAmount, items, updateItemQuantity, removeCartItem } = useCart();
+  const [submitting, setSubmitting] = useState(false);
+  const { totalAmount, items, updateItemQuantity, removeCartItem, loading } =
+    useCart();
 
   const form = useForm<CheckoutFormValues>({
     resolver: zodResolver(checkoutFormSchema),
@@ -26,8 +32,27 @@ export default function CheckoutPage() {
     },
   });
 
-  const onSubmit = (data: CheckoutFormValues) => {
-    console.log(data);
+  const onSubmit = async (data: CheckoutFormValues) => {
+    try {
+      setSubmitting(true);
+      const url = await createOrder(data);
+
+      toast.success("Замовлення успішно створено! Перехід до оплати", {
+        icon: <CheckIcon />,
+      });
+
+      if (url) {
+        location.href = url;
+      }
+    } catch (err) {
+      console.log(err);
+      setSubmitting(false);
+      toast.error("Не вдалось створити замовлення", {
+        icon: <ErrorIcon />,
+      });
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const onClickCountButton = (
@@ -55,17 +80,25 @@ export default function CheckoutPage() {
                 onClickCountButton={onClickCountButton}
                 removeCartItem={removeCartItem}
                 items={items}
+                loading={loading}
               />
               {/* Персональні дані */}
-              <CheckoutPersonalForm />
-              
+              <CheckoutPersonalForm
+                className={loading ? "opacity-40 pointer-events-none" : ""}
+              />
+
               {/* Адреса */}
-              <CheckoutAddressForm />
+              <CheckoutAddressForm
+                className={loading ? "opacity-40 pointer-events-none" : ""}
+              />
             </div>
 
             {/* Права частина */}
             <div className="w-[450px]">
-              <CheckoutSidebar totalAmount={totalAmount} />
+              <CheckoutSidebar
+                totalAmount={totalAmount}
+                loading={loading || submitting}
+              />
             </div>
           </div>
         </form>

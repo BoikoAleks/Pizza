@@ -1,25 +1,34 @@
 import { ArrowRight, Package, Truck } from "lucide-react";
 import { CheckoutItemDetails } from "./checkout-item-details";
 import { WhiteBlock } from "./white-block";
-import { Button } from "../ui";
+import { Button, Skeleton } from "../ui";
 import { cn } from "@/shared/lib/utils";
 
 
 interface Props {
   totalAmount: number;
   className?: string;
+  loading: boolean;
 }
 
 const DELIVERY_PRICE = 150;
 
-export const CheckoutSidebar: React.FC<Props> = ({ className, totalAmount }) => {
+export const CheckoutSidebar: React.FC<Props> = ({
+  className,
+  totalAmount,
+  loading,
+}) => {
   return (
     <WhiteBlock className={cn("p-6 sticky top-4", className)}>
       <div className="flex flex-col gap-1">
         <span className="text-xl"> Загальна сума: </span>
-        <span className="text-[34px] font-bold">
-          {totalAmount + DELIVERY_PRICE} грн
-        </span>
+        {loading ? (
+          <Skeleton className="h-11 w-48" />
+        ) : (
+          <span className="h-11 text-[34px] font-bold">
+            {totalAmount + DELIVERY_PRICE} грн
+          </span>
+        )}
       </div>
 
       <CheckoutItemDetails
@@ -29,7 +38,13 @@ export const CheckoutSidebar: React.FC<Props> = ({ className, totalAmount }) => 
             Сума замовлення:
           </div>
         }
-        value={`${totalAmount} грн`}
+        value={
+          loading ? (
+            <Skeleton className="h-6 w-14 rounded-[6px]" />
+          ) : (
+            `${totalAmount} грн`
+          )
+        }
       />
       <CheckoutItemDetails
         title={
@@ -38,11 +53,19 @@ export const CheckoutSidebar: React.FC<Props> = ({ className, totalAmount }) => 
             Вартість доставки:
           </div>
         }
-        value={`${DELIVERY_PRICE} грн`}
+        value={
+          loading ? (
+            <Skeleton className="h-6 w-14 rounded-[6px]" />
+          ) : (
+            `${DELIVERY_PRICE} грн`
+          )
+        }
       />
 
       <Button
+        loading={loading}
         type="submit"
+        
         className="w-full h-14 rounded-2xl mt-6 text-base font-bold"
       >
         Оформити замовлення

@@ -29,11 +29,11 @@ export const CheckoutCart: React.FC<Props> = ({
     <WhiteBlock title="1. Кошик" className={className}>
       <div className="flex flex-col gap-5">
         {loading
-          ? [...Array(4)].map((_, index) => (
+          ? [...Array(3)].map((_, index) => (
               <CheckoutItemSkeleton key={index} />
             ))
           : items.map((item) => (
-              <CheckoutItem
+              <CheckoutItem 
                 key={item.id}
                 id={item.id}
                 imageUrl={item.imageUrl}
