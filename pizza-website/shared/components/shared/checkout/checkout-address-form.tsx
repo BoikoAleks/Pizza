@@ -8,9 +8,8 @@ import {
   autocompleteAddress,
   SimplifiedNominatimResult,
 } from "@/shared/lib/openstreetmap";
-
-// 1. ІМПОРТУЄМО УТИЛІТУ `cn` для об'єднання класів
 import { cn } from "@/shared/lib/utils";
+
 
 interface Props {
   className?: string;

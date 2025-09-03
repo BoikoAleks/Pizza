@@ -7,11 +7,11 @@
     ],
     "allowJs": true,
     "skipLibCheck": true,
-    "strict": true, // Рекомендую ввімкнути strict для надійності коду
+    "strict": true,
     "noEmit": true,
     "esModuleInterop": true,
     "module": "esnext",
-    "moduleResolution": "bundler", // Більш сучасна опція для Next.js
+    "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "preserve",
@@ -21,22 +21,20 @@
         "name": "next"
       }
     ],
-    // --- ПОЧАТОК ДОДАНИХ ЗМІН ---
     "baseUrl": ".",
     "paths": {
       "@/*": [
         "./*"
       ]
-    }
-    // --- КІНЕЦЬ ДОДАНИХ ЗМІН ---
-    ,
+    },
     "target": "ES2017"
   },
   "include": [
     "next-env.d.ts",
     ".next/types/**/*.ts",
     "**/*.ts",
-    "**/*.tsx"
+    "**/*.tsx",
+    "@types/*.d.ts"
   ],
   "exclude": [
     "node_modules"

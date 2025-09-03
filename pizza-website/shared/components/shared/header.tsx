@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import React from "react";
 import { Container } from "./container";
@@ -9,6 +9,9 @@ import { cn } from "../../lib/utils";
 import { CartButton } from "./cart-button";
 import { ProfileButton } from "./profile-button";
 import { AuthModal } from "./modals/auth-modal";
+import { useSearchParams } from "next/navigation";
+import toast from "react-hot-toast";
+import router from "next/router";
 
 interface Props {
   className?: string;
@@ -22,6 +25,28 @@ export const Header: React.FC<Props> = ({
   className,
 }) => {
   const [openAuthModal, setOpenAuthModal] = React.useState(false);
+
+  const searchParams = useSearchParams();
+
+  React.useEffect(() => {
+    let toastMessage = "";
+
+    if (searchParams.has("paid")) {
+      toastMessage = "Оплата пройшла успішно! 🍕";
+    }
+
+    if (searchParams.has("verified")) {
+      toastMessage = "Пошта успішно підтверджена! 🍕";
+    }
+    if (toastMessage) {
+      setTimeout(() => {
+        router.replace("/");
+        toast.success(toastMessage, {
+          duration: 3000,
+        });
+      }, 1000);
+    }
+  }, []);
   return (
     <header className={cn(" border-gray-300", className)}>
       <Container className="flex items-center justify-between py-8">

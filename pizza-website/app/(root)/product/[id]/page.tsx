@@ -3,6 +3,7 @@ import { prisma } from "@/prisma/prisma-client";
 import { notFound } from "next/navigation";
 import { ProductForm } from "@/shared/components/shared/product-form";
 
+
 export default async function ProductPage({
   params,
 }: {

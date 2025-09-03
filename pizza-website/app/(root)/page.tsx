@@ -2,6 +2,7 @@ import {
   Container,
   Filters,
   ProductGroupList,
+  Stories,
   Title,
   TopBar,
 } from "@/shared/components/shared";
@@ -17,7 +18,7 @@ export default async function Home({
   const categories = await findPizzas(plainSearchParams as GetSearchParams);
   return (
     <>
-      <Container className="mt-8">
+      <Container className="mt-10">
         <Title text="Всі піци" size="lg" className="font-extrabold" />
       </Container>
 
@@ -26,8 +27,9 @@ export default async function Home({
           (category) => category.products.length > 0
         )}
       />
+      <Stories />
 
-      <Container className=" mt-9 pb-5">
+      <Container className=" mt-10 pb-14">
         <div className="flex gap-56">
           {/* Фільтрація*/}
           <div className="w-44">

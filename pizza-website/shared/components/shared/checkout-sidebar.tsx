@@ -4,14 +4,13 @@ import { WhiteBlock } from "./white-block";
 import { Button, Skeleton } from "../ui";
 import { cn } from "@/shared/lib/utils";
 
-
 interface Props {
   totalAmount: number;
   className?: string;
   loading: boolean;
 }
 
-const DELIVERY_PRICE = 150;
+const DELIVERY_PRICE = 100;
 
 export const CheckoutSidebar: React.FC<Props> = ({
   className,
@@ -40,7 +39,7 @@ export const CheckoutSidebar: React.FC<Props> = ({
         }
         value={
           loading ? (
-            <Skeleton className="h-6 w-14 rounded-[6px]" />
+            <Skeleton className="h-6 w-16 rounded-[6px]" />
           ) : (
             `${totalAmount} грн`
           )
@@ -65,7 +64,6 @@ export const CheckoutSidebar: React.FC<Props> = ({
       <Button
         loading={loading}
         type="submit"
-        
         className="w-full h-14 rounded-2xl mt-6 text-base font-bold"
       >
         Оформити замовлення

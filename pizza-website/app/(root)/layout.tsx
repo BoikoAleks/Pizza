@@ -1,7 +1,9 @@
-import { Metadata } from "next";
+import { Header } from "@/shared/components/shared";
+import type { Metadata } from "next";
+import { Suspense } from "react";
 
 export const metadata: Metadata = {
-  title: "Pizza Website",
+  title: "Next Pizza | Головна",
 };
 
 export default function HomeLayout({
@@ -12,8 +14,10 @@ export default function HomeLayout({
   modal: React.ReactNode;
 }>) {
   return (
-    // Просто повертаємо контент, який буде вкладено в кореневий layout
     <main className="min-h-screen">
+      <Suspense>
+        <Header />
+      </Suspense>
       {children}
       {modal}
     </main>

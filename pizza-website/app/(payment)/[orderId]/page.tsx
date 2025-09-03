@@ -1,11 +1,16 @@
-import { prisma } from '@/prisma/prisma-client';
-import { notFound } from 'next/navigation';
- // Створимо цю дію далі
-import { Button } from '@/shared/components/ui';
-import { createCheckoutSession } from '@/app/actions';
+import { prisma } from "@/prisma/prisma-client";
+import { notFound } from "next/navigation";
+// Створимо цю дію далі
+import { Button } from "@/shared/components/ui";
+import { createCheckoutSession } from "@/app/actions";
 
-export default async function PaymentPage({ params }: { params: { orderId: string } }) {
-  const orderId = Number(params.orderId);
+export default async function PaymentPage({
+  params,
+}: {
+  params: { orderId: string };
+}) {
+  const awaitedParams = await params;
+  const orderId = Number(awaitedParams.orderId);
 
   if (isNaN(orderId)) {
     return notFound();

@@ -92,21 +92,6 @@
     }
   }
 
-  body {
-    @apply bg-[var(--background)] text-[var(--foreground)];
-    font-family: var(--font-nunito), sans-serif;
-  }
-
-  .scrollbar::-webkit-scrollbar-track {
-    border-radius: 6px;
-    background: #fff;
-  }
-
-  .scrollbar::-webkit-scrollbar-thumb {
-    background: #dbdadd;
-    border-radius: 6px;
-  }
-
 }
 
 /* ==== УТИЛІТИ ==== */
@@ -128,3 +113,49 @@
 #nprogress .spinner-icon {
   @apply !border-t-[var(--primary)] !border-l-[var(--primary)];
 }
+
+* {
+  font-family: var(--font-nunito), sans-serif;
+
+}
+
+
+.scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.scrollbar::-webkit-scrollbar-track {
+  border-radius: 6px;
+  background: #fff;
+}
+
+.scrollbar::-webkit-scrollbar-thumb {
+  background: #dbdadd;
+  border-radius: 6px;
+}
+
+.scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #dbdadd;
+}
+
+html, body {
+  height: 100%;
+  min-height: 100vh;
+  overflow: visible !important;
+  position: relative;
+}
+
+#modal-root {
+  position: fixed !important;
+  z-index: 9999 !important;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+}
+
+#modal-root > * {
+  pointer-events: auto;
+}
+

@@ -21,8 +21,6 @@ import { Title } from "./title";
 import { cn } from "@/shared/lib/utils";
 import { useCart } from "@/shared/hooks";
 
-
-
 export const CartDrawer: React.FC<React.PropsWithChildren> = ({ children }) => {
   const { totalAmount, items, updateItemQuantity, removeCartItem } = useCart();
   const [redirecting, setRedirecting] = React.useState(false);
@@ -96,7 +94,6 @@ export const CartDrawer: React.FC<React.PropsWithChildren> = ({ children }) => {
                       name={item.name}
                       price={item.price}
                       quantity={item.quantity}
-                      
                       onClickCountButton={(type) =>
                         onClickCountButton(item.id, item.quantity, type)
                       }
@@ -119,7 +116,12 @@ export const CartDrawer: React.FC<React.PropsWithChildren> = ({ children }) => {
                   </div>
                   {/* кнопка оформлення замовлення */}
                   <Link href="/checkout">
-                    <Button onClick={() => setRedirecting(true)} loading={redirecting} type="submit" className="w-full h-12 text-base">
+                    <Button
+                      onClick={() => setRedirecting(true)}
+                      loading={redirecting}
+                      type="submit"
+                      className="w-full h-12 text-base"
+                    >
                       Оформити заказ
                       <ArrowRight className="w-5 ml-2" />
                     </Button>

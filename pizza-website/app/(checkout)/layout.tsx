@@ -2,7 +2,7 @@ import { Container, Header } from "@/shared/components/shared";
 import { Suspense } from "react";
 
 export const metadata = {
-  title: "Pizza Website",
+  title: "Pizza Website | Кошик ",
 };
 
 export default function CheckoutLayout({
@@ -12,9 +12,14 @@ export default function CheckoutLayout({
 }) {
   return (
     <main className="min-h-screen bg-[#F4F1EE]">
-      <Header hasSearch={false} hasCart={false} className="border-gray-200" />
       <Container>
-        <Suspense></Suspense>
+        <Suspense>
+          <Header
+            hasSearch={false}
+            hasCart={false}
+            className="border-b-gray-200"
+          />
+        </Suspense>
         {children}
       </Container>
     </main>

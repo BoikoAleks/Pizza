@@ -16,7 +16,7 @@ export const FilterCheckbox: React.FC<FilterChecboxProps> = ({
   endAdornment,
   onCheckedChange,
   checked,
-  name
+  name,
 }) => {
   return (
     <div className="flex items-center space-x-2">
