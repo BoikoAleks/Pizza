@@ -2,7 +2,7 @@
 
 import { useFormContext } from "react-hook-form";
 import { CheckoutFormValues } from "@/shared/constants";
-import { WhiteBlock } from "../white-block"; // 1. Імпортуємо ваш компонент WhiteBlock
+import { WhiteBlock } from "../white-block";
 import { cn } from "@/shared/lib/utils";
 import {
   FormControl,
@@ -13,7 +13,6 @@ import {
 import { RadioGroup, RadioGroupItem } from "@/shared/components/ui/radio-group";
 import { Label } from "@/shared/components/ui/label";
 
-// Типізуємо наші точки самовивозу
 interface PickupPoint {
   id: number;
   name: string;
@@ -29,12 +28,7 @@ export const CheckoutPickup = ({ className, points }: Props) => {
   const { control } = useFormContext<CheckoutFormValues>();
 
   return (
-    // 2. Використовуємо WhiteBlock, як у вашому CheckoutAddressForm
-    <WhiteBlock
-      title="3. Інформація про самовивіз"
-      className={cn(className)}
-    >
-      {/* 3. Всю логіку вибору точки розміщуємо всередині */}
+    <WhiteBlock title="3. Інформація про самовивіз" className={cn(className)}>
       <FormField
         control={control}
         name="address"

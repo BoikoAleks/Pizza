@@ -28,3 +28,4 @@ export { Stories } from "./stories";
 export * from "./form"
 export * from "./modals";
 
+export type SearchParams = { [key: string]: string | string[] | undefined };

@@ -16,7 +16,7 @@ import { redirect } from 'next/navigation';
 import Stripe from 'stripe';
 import { z } from 'zod';
 import { revalidatePath } from 'next/cache';
-import { changePasswordSchema, personalDataSchema } from '@/shared/components/shared/modals/auth-modal/forms/schemas';
+import { changePasswordSchema, personalDataSchema, productFormSchema, ProductFormValues } from '@/shared/components/shared/modals/auth-modal/forms/schemas';
 
 
 
@@ -74,10 +74,10 @@ export async function createOrder(data: CheckoutFormValues) {
         totalAmount: userCart.totalAmount,
         status: OrderStatus.PENDING,
         items: JSON.stringify(userCart.items),
-        
+
         // === КРОК 2: ДОДАЄМО ID КОРИСТУВАЧА, ЯКЩО ВІН АВТОРИЗОВАНИЙ ===
         // Це головне виправлення.
-       userId: session?.id ? Number(session.id) : undefined,
+        userId: session?.id ? Number(session.id) : undefined,
       },
     });
 
@@ -291,4 +291,92 @@ export async function updateUserPassword(
     console.error("ERROR [UPDATE_USER_PASSWORD]:", error);
     throw new Error("Не вдалося оновити пароль.");
   }
+}
+
+export async function updateOrderStatus(orderId: number, status: OrderStatus) {
+  const session = await getUserSession();
+
+  if (session?.role !== 'MANAGER' && session?.role !== 'ADMIN') {
+    throw new Error('Недостатньо прав');
+  }
+
+  try {
+    await prisma.order.update({
+      where: { id: orderId },
+      data: { status },
+    });
+    revalidatePath('/manager');
+  } catch (error) {
+    console.error('Error [UPDATE_ORDER_STATUS]', error);
+    throw new Error('Не вдалося оновити статус.');
+  }
+}
+
+async function checkManagerRole() {
+  const session = await getUserSession();
+  if (session?.role !== 'MANAGER' && session?.role !== 'ADMIN') {
+    throw new Error('Недостатньо прав');
+  }
+}
+export async function upsertProduct(data: ProductFormValues) {
+  await checkManagerRole();
+
+  // Валідуємо дані на сервері
+  const validatedData = productFormSchema.parse(data);
+  const { id: productId, items, ingredientIds, ...productData } = validatedData;
+
+  const productPayload = {
+    ...productData,
+    ingredients: {
+      set: ingredientIds?.map(id => ({ id })) || [],
+    },
+  };
+
+  if (productId) {
+    // --- ОНОВЛЕННЯ ІСНУЮЧОГО ПРОДУКТУ ---
+    await prisma.product.update({
+      where: { id: productId },
+      data: {
+        ...productPayload,
+        items: {
+          deleteMany: {}, // Спочатку видаляємо старі варіанти
+          create: items.map(({ price, size, pizzaType }) => ({ // Потім створюємо нові
+            price,
+            size,
+            pizzaType,
+          })),
+        },
+      },
+    });
+  } else {
+    // --- СТВОРЕННЯ НОВОГО ПРОДУКТУ ---
+    await prisma.product.create({
+      data: {
+        ...productPayload,
+        items: {
+          create: items.map(({ price, size, pizzaType }) => ({
+            price,
+            size,
+            pizzaType,
+          })),
+        },
+      },
+    });
+  }
+
+  // Оновлюємо кеш, щоб побачити зміни одразу
+  revalidatePath('/manager/menu');
+}
+
+
+// --- ФУНКЦІЯ ДЛЯ ВИДАЛЕННЯ ПРОДУКТУ ---
+export async function deleteProduct(productId: number) {
+  await checkManagerRole();
+
+  // Видаляємо продукт. Prisma автоматично видалить пов'язані ProductItem
+  await prisma.product.delete({
+    where: { id: productId },
+  });
+
+  revalidatePath('/manager/menu');
 }

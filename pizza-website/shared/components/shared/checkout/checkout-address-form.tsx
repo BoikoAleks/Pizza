@@ -9,7 +9,6 @@ import {
   SimplifiedNominatimResult,
 } from "@/shared/lib/openstreetmap";
 import { cn } from "@/shared/lib/utils";
-// 1. Імпортуємо інструменти з react-hook-form та вашої UI-бібліотеки
 import { useFormContext } from "react-hook-form";
 import { FormControl, FormField, FormItem, FormMessage } from "../../ui/form";
 import { CheckoutFormValues } from "@/shared/constants";
@@ -19,13 +18,8 @@ interface Props {
 }
 
 export const CheckoutAddressForm: React.FC<Props> = ({ className }) => {
-  // 2. Отримуємо доступ до керування формою
   const { control, watch, setValue } = useFormContext<CheckoutFormValues>();
-
-  // 3. Використовуємо `watch` для відстеження значення поля адреси для автокомпліту
   const streetAddress = watch("address");
-
-  // 4. Локальний стан залишаємо ТІЛЬКИ для логіки UI (автокомпліт), а не для даних форми
   const [predictions, setPredictions] = useState<SimplifiedNominatimResult[]>(
     []
   );
@@ -40,7 +34,6 @@ export const CheckoutAddressForm: React.FC<Props> = ({ className }) => {
   }, []);
 
   useEffect(() => {
-    // Автокомпліт тепер працює на основі даних з react-hook-form
     if (!streetAddress || !streetAddress.trim()) {
       setPredictions([]);
       return;
@@ -65,7 +58,6 @@ export const CheckoutAddressForm: React.FC<Props> = ({ className }) => {
   }, [wrapperRef]);
 
   const handlePredictionClick = (prediction: SimplifiedNominatimResult) => {
-    // 5. Оновлюємо значення форми через setValue, а не локальний стан
     setValue("address", prediction.display_name, { shouldValidate: true });
     setPredictions([]);
   };
@@ -74,7 +66,6 @@ export const CheckoutAddressForm: React.FC<Props> = ({ className }) => {
     <WhiteBlock title="3. Інформація про доставку" className={cn(className)}>
       <div className="flex flex-col gap-5">
         <div className="relative" ref={wrapperRef}>
-          {/* 6. Обгортаємо Input в FormField для підключення до форми */}
           <FormField
             control={control}
             name="address"
@@ -82,7 +73,7 @@ export const CheckoutAddressForm: React.FC<Props> = ({ className }) => {
               <FormItem>
                 <FormControl>
                   <Input
-                    {...field} // Передаємо всі властивості (value, onChange, onBlur)
+                    {...field}
                     className="text-base"
                     placeholder="Введіть назву вулиці, номер будинку..."
                     autoComplete="off"
@@ -115,7 +106,6 @@ export const CheckoutAddressForm: React.FC<Props> = ({ className }) => {
         </div>
       </div>
 
-      {/* 7. Також обгортаємо FormTextarea для правильної роботи з полем 'comment' */}
       <FormField
         control={control}
         name="comment"
