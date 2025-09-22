@@ -14,6 +14,11 @@ import { hashSync } from 'bcrypt';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import Stripe from 'stripe';
+import { z } from 'zod';
+import { revalidatePath } from 'next/cache';
+import { changePasswordSchema, personalDataSchema } from '@/shared/components/shared/modals/auth-modal/forms/schemas';
+
+
 
 export async function createOrder(data: CheckoutFormValues) {
   try {
@@ -24,7 +29,10 @@ export async function createOrder(data: CheckoutFormValues) {
       throw new Error('Cart token not found');
     }
 
-    /* Находим корзину по токену */
+    // === КРОК 1: ОТРИМУЄМО СЕСІЮ ПОТОЧНОГО КОРИСТУВАЧА ===
+    const session = await getUserSession();
+
+    // Знаходимо корзину по токену
     const userCart = await prisma.cart.findFirst({
       include: {
         user: true,
@@ -44,17 +52,17 @@ export async function createOrder(data: CheckoutFormValues) {
       },
     });
 
-    /* Если корзина не найдена возращаем ошибку */
+    // Якщо корзина не знайдена, повертаємо помилку
     if (!userCart) {
       throw new Error('Cart not found');
     }
 
-    /* Если корзина пустая возращаем ошибку */
+    // Якщо корзина пуста, повертаємо помилку
     if (userCart?.totalAmount === 0) {
       throw new Error('Cart is empty');
     }
 
-    /* Создаем заказ */
+    // Створюємо замовлення
     const order = await prisma.order.create({
       data: {
         token: cartToken,
@@ -66,10 +74,14 @@ export async function createOrder(data: CheckoutFormValues) {
         totalAmount: userCart.totalAmount,
         status: OrderStatus.PENDING,
         items: JSON.stringify(userCart.items),
+        
+        // === КРОК 2: ДОДАЄМО ID КОРИСТУВАЧА, ЯКЩО ВІН АВТОРИЗОВАНИЙ ===
+        // Це головне виправлення.
+       userId: session?.id ? Number(session.id) : undefined,
       },
     });
 
-    /* Очищаем корзину */
+    // Очищуємо корзину
     await prisma.cart.update({
       where: {
         id: userCart.id,
@@ -85,9 +97,7 @@ export async function createOrder(data: CheckoutFormValues) {
       },
     });
 
-
-
-    const paymentUrl = 'https://payment.url/confirm/';
+    const paymentUrl = 'https://payment.url/confirm/'; // Це заглушка, ймовірно ви її заміните
 
     await sendEmail(
       data.email,
@@ -102,6 +112,8 @@ export async function createOrder(data: CheckoutFormValues) {
     return paymentUrl;
   } catch (err) {
     console.log('[CreateOrder] Server error', err);
+    // Важливо повертати або обробляти помилку, щоб клієнт знав про неї
+    throw new Error('Failed to create order.');
   }
 }
 
@@ -190,6 +202,7 @@ export async function updateUserInfo(body: Prisma.UserUpdateInput) {
   }
 }
 
+
 export async function registerUser(body: Prisma.UserCreateInput) {
   try {
     const user = await prisma.user.findFirst({
@@ -233,5 +246,49 @@ export async function registerUser(body: Prisma.UserCreateInput) {
   } catch (err) {
     console.log('Error [CREATE_USER]', err);
     throw err;
+  }
+}
+
+export async function updatePersonalData(
+  values: z.infer<typeof personalDataSchema>
+) {
+  const session = await getUserSession();
+  if (!session?.id) {
+    throw new Error("Не авторизований");
+  }
+
+  try {
+    await prisma.user.update({
+      where: { id: Number(session.id) },
+      data: {
+        fullName: values.fullName,
+        // Рядок з 'phone' видалено
+      },
+    });
+    revalidatePath("/profile");
+  } catch (error) {
+    console.error("ERROR [UPDATE_PERSONAL_DATA]:", error);
+    throw new Error("Не вдалося оновити дані.");
+  }
+}
+export async function updateUserPassword(
+  values: z.infer<typeof changePasswordSchema>
+) {
+  const session = await getUserSession();
+  if (!session?.id) {
+    throw new Error("Не авторизований");
+  }
+
+  try {
+    const hashedPassword = hashSync(values.newPassword, 10);
+    await prisma.user.update({
+      where: { id: Number(session.id) },
+      data: {
+        password: hashedPassword,
+      },
+    });
+  } catch (error) {
+    console.error("ERROR [UPDATE_USER_PASSWORD]:", error);
+    throw new Error("Не вдалося оновити пароль.");
   }
 }

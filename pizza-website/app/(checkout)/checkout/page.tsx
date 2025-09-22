@@ -8,7 +8,9 @@ import {
   CheckoutAddressForm,
   CheckoutCart,
   CheckoutPersonalForm,
+  CheckoutPickup,
 } from "@/shared/components/shared/checkout";
+
 import { checkoutFormSchema, CheckoutFormValues } from "@/shared/constants";
 import { createOrder } from "@/app/actions";
 import { ErrorIcon, toast } from "react-hot-toast";
@@ -17,9 +19,20 @@ import { useState } from "react";
 import { useSession } from "next-auth/react";
 import React from "react";
 import { Api } from "@/shared/services/api-client";
+import { cn } from "@/shared/lib/utils";
+import { CheckoutTimeSelection } from "@/shared/components/shared/checkout/checkout-time-selection";
+
+const PICKUP_POINTS = [
+  { id: 1, name: "Наше кафе на Хрещатику", address: "м. Київ, вул. Хрещатик, 1" },
+  { id: 2, name: "Кав'ярня 'Затишок'", address: "м. Київ, вул. Велика Васильківська, 5" },
+  { id: 3, name: "Пункт видачі 'Швидко'", address: "м. Київ, просп. Перемоги, 22" },
+];
 
 export default function CheckoutPage() {
   const [submitting, setSubmitting] = useState(false);
+  const [deliveryMethod, setDeliveryMethod] = useState<"delivery" | "pickup">(
+    "delivery"
+  );
   const { totalAmount, items, updateItemQuantity, removeCartItem, loading } =
     useCart();
   const { data: session } = useSession();
@@ -33,6 +46,7 @@ export default function CheckoutPage() {
       phone: "",
       address: "",
       comment: "",
+      deliveryTime: "", // Додано початкове значення
     },
   });
 
@@ -40,17 +54,14 @@ export default function CheckoutPage() {
     async function fetchUserInfo() {
       const data = await Api.auth.getMe();
       const [firstName, lastName] = data.fullName.split(' ');
-
       form.setValue('firstName', firstName);
       form.setValue('lastName', lastName);
       form.setValue('email', data.email);
-
-
     }
     if (session) {
       fetchUserInfo();
     }
-  }, [session]);
+  }, [session, form]);
 
   const onSubmit = async (data: CheckoutFormValues) => {
     try {
@@ -84,6 +95,11 @@ export default function CheckoutPage() {
     updateItemQuantity(id, newQuantity);
   };
 
+  const handleDeliveryMethodChange = (method: "delivery" | "pickup") => {
+    setDeliveryMethod(method);
+    form.setValue("address", "", { shouldValidate: true });
+  };
+
   return (
     <Container className="mt-6">
       <Title
@@ -102,13 +118,55 @@ export default function CheckoutPage() {
                 items={items}
                 loading={loading}
               />
-              {/* Персональні дані */}
               <CheckoutPersonalForm
                 className={loading ? "opacity-40 pointer-events-none" : ""}
               />
 
-              {/* Адреса */}
-              <CheckoutAddressForm
+              {/* ОНОВЛЕНИЙ БЛОК: Вибір способу доставки */}
+              <div className={`bg-white rounded-xl p-6 shadow-sm ${loading ? "opacity-40 pointer-events-none" : ""}`}>
+                <h2 className="text-2xl font-bold mb-6">2. Спосіб доставки</h2>
+                <div className="flex gap-3">
+                  <button
+                    type="button"
+                    onClick={() => handleDeliveryMethodChange("delivery")}
+                    className={cn(
+                      "flex-1 p-3 rounded-lg text-center transition-colors border",
+                      deliveryMethod === "delivery"
+                        ? "bg-black text-white border-black font-semibold"
+                        : "bg-white hover:bg-gray-50 border-gray-200"
+                    )}
+                  >
+                    Доставка
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleDeliveryMethodChange("pickup")}
+                    className={cn(
+                      "flex-1 p-3 rounded-lg text-center transition-colors border",
+                      deliveryMethod === "pickup"
+                        ? "bg-black text-white border-black font-semibold"
+                        : "bg-white hover:bg-gray-50 border-gray-200"
+                    )}
+                  >
+                    Самовивіз
+                  </button>
+                </div>
+              </div>
+
+              {/* Умовний рендеринг форми адреси або точок самовивозу */}
+              {deliveryMethod === "delivery" ? (
+                <CheckoutAddressForm
+                  className={loading ? "opacity-40 pointer-events-none" : ""}
+                />
+              ) : (
+                <CheckoutPickup
+                  points={PICKUP_POINTS}
+                  className={loading ? "opacity-40 pointer-events-none" : ""}
+                />
+              )}
+
+              {/* НОВИЙ КОМПОНЕНТ: Вибір часу */}
+              <CheckoutTimeSelection
                 className={loading ? "opacity-40 pointer-events-none" : ""}
               />
             </div>

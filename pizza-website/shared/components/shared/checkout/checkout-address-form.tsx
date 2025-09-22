@@ -9,16 +9,23 @@ import {
   SimplifiedNominatimResult,
 } from "@/shared/lib/openstreetmap";
 import { cn } from "@/shared/lib/utils";
-
+// 1. Імпортуємо інструменти з react-hook-form та вашої UI-бібліотеки
+import { useFormContext } from "react-hook-form";
+import { FormControl, FormField, FormItem, FormMessage } from "../../ui/form";
+import { CheckoutFormValues } from "@/shared/constants";
 
 interface Props {
   className?: string;
 }
+
 export const CheckoutAddressForm: React.FC<Props> = ({ className }) => {
-  const [address, setAddress] = useState("");
-  const [houseNumber, setHouseNumber] = useState("");
-  const [apartment, setApartment] = useState("");
-  const [isAddressSelected, setIsAddressSelected] = useState(false);
+  // 2. Отримуємо доступ до керування формою
+  const { control, watch, setValue } = useFormContext<CheckoutFormValues>();
+
+  // 3. Використовуємо `watch` для відстеження значення поля адреси для автокомпліту
+  const streetAddress = watch("address");
+
+  // 4. Локальний стан залишаємо ТІЛЬКИ для логіки UI (автокомпліт), а не для даних форми
   const [predictions, setPredictions] = useState<SimplifiedNominatimResult[]>(
     []
   );
@@ -33,15 +40,16 @@ export const CheckoutAddressForm: React.FC<Props> = ({ className }) => {
   }, []);
 
   useEffect(() => {
-    if (!address.trim() || isAddressSelected) {
+    // Автокомпліт тепер працює на основі даних з react-hook-form
+    if (!streetAddress || !streetAddress.trim()) {
       setPredictions([]);
       return;
     }
     const timerId = setTimeout(() => {
-      fetchPredictions(address);
+      fetchPredictions(streetAddress);
     }, 300);
     return () => clearTimeout(timerId);
-  }, [address, fetchPredictions, isAddressSelected]);
+  }, [streetAddress, fetchPredictions]);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -56,31 +64,33 @@ export const CheckoutAddressForm: React.FC<Props> = ({ className }) => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [wrapperRef]);
 
-  const handleAddressChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setAddress(e.target.value);
-    setIsAddressSelected(false);
-    setHouseNumber("");
-    setApartment("");
-  };
-
   const handlePredictionClick = (prediction: SimplifiedNominatimResult) => {
-    setAddress(prediction.display_name);
+    // 5. Оновлюємо значення форми через setValue, а не локальний стан
+    setValue("address", prediction.display_name, { shouldValidate: true });
     setPredictions([]);
-    setIsAddressSelected(true);
   };
 
   return (
-    // 2. ПЕРЕДАЄМО `className` В КОРЕНЕВИЙ КОМПОНЕНТ `WhiteBlock`
     <WhiteBlock title="3. Інформація про доставку" className={cn(className)}>
       <div className="flex flex-col gap-5">
         <div className="relative" ref={wrapperRef}>
-          <Input
+          {/* 6. Обгортаємо Input в FormField для підключення до форми */}
+          <FormField
+            control={control}
             name="address"
-            className="text-base"
-            placeholder="Введіть назву вулиці..."
-            value={address}
-            onChange={handleAddressChange}
-            autoComplete="off"
+            render={({ field }) => (
+              <FormItem>
+                <FormControl>
+                  <Input
+                    {...field} // Передаємо всі властивості (value, onChange, onBlur)
+                    className="text-base"
+                    placeholder="Введіть назву вулиці, номер будинку..."
+                    autoComplete="off"
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
           />
 
           {predictions.length > 0 && (
@@ -103,32 +113,25 @@ export const CheckoutAddressForm: React.FC<Props> = ({ className }) => {
             </div>
           )}
         </div>
-
-        {isAddressSelected && (
-          <div className="grid grid-cols-2 gap-5">
-            <Input
-              name="houseNumber"
-              className="text-base"
-              placeholder="Номер будинку"
-              value={houseNumber}
-              onChange={(e) => setHouseNumber(e.target.value)}
-            />
-            <Input
-              name="apartment"
-              className="text-base"
-              placeholder="Квартира (необов'язково)"
-              value={apartment}
-              onChange={(e) => setApartment(e.target.value)}
-            />
-          </div>
-        )}
       </div>
 
-      <FormTextarea
+      {/* 7. Також обгортаємо FormTextarea для правильної роботи з полем 'comment' */}
+      <FormField
+        control={control}
         name="comment"
-        className="text-base mt-5"
-        placeholder="Коментар до замовлення"
-        rows={5}
+        render={({ field }) => (
+          <FormItem>
+            <FormControl>
+              <FormTextarea
+                {...field}
+                className="text-base mt-5"
+                placeholder="Коментар до замовлення"
+                rows={5}
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
       />
     </WhiteBlock>
   );

@@ -1,6 +1,10 @@
 "use client";
 
-import { Dialog, DialogContent } from "@/shared/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+} from "@/shared/components/ui/dialog";
 import { cn } from "@/shared/lib/utils";
 import React from "react";
 import { useRouter } from "next/navigation";
@@ -30,6 +34,7 @@ export const ChooseProductModal: React.FC<Props> = ({ product, className }) => {
           className
         )}
       >
+        <DialogTitle></DialogTitle>
         <ProductForm product={product} onSubmit={() => router.back()} />
       </DialogContent>
     </Dialog>
