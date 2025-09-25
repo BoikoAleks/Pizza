@@ -1,4 +1,3 @@
-// ФАЙЛ: app/manager/page.tsx
 import { getUserSession } from "@/shared/lib/get-user-session";
 import Link from "next/link";
 import {
@@ -6,9 +5,9 @@ import {
   ListOrdered,
   ChartNoAxesCombined,
   UtensilsCrossed,
+  MessageCircle,
 } from "lucide-react";
 
-// Масив для зручного рендерингу карток
 const dashboardLinks = [
   {
     href: "/manager/active-orders",
@@ -33,6 +32,12 @@ const dashboardLinks = [
     title: "Аналітика",
     description: "Звіти про продажі та ключові показники ефективності.",
     Icon: ChartNoAxesCombined,
+  },
+  {
+    href: "/manager/chat",
+    title: "Чат з клієнтами",
+    description: "Спілкування з клієнтами в режимі реального часу.",
+    Icon: MessageCircle,
   },
 ];
 

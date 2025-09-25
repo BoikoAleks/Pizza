@@ -1,4 +1,3 @@
-// ФАЙЛ: app/manager/_components/manager-nav.tsx
 "use client";
 
 import { usePathname } from "next/navigation";
@@ -9,14 +8,15 @@ import {
   ListOrdered,
   UtensilsCrossed,
   ChartNoAxesCombined,
+  MessageCircle,
 } from "lucide-react";
 
-// Масив з посиланнями для зручного керування
 const navLinks = [
   { href: "/manager", text: "Головна", Icon: LayoutDashboard },
   { href: "/manager/orders", text: "Замовлення", Icon: ListOrdered },
   { href: "/manager/menu", text: "Управління меню", Icon: UtensilsCrossed },
   { href: "/manager/analytics", text: "Аналітика", Icon: ChartNoAxesCombined },
+  { href: "/manager/chat", text: "Чат", Icon: MessageCircle },
 ];
 
 export const ManagerNav = () => {
@@ -38,8 +38,8 @@ export const ManagerNav = () => {
             className={cn(
               "flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-all",
               (href === "/manager" ? isMainActive : isActive)
-                ? "border-primary text-primary"
-                : "border-transparent text-gray-500 hover:text-gray-800 hover:border-gray-300"
+                ? " text-[var(--primary)]"
+                : "border-transparent text-gray-500 hover:text-[var(--primary)]"
             )}
           >
             <Icon size={16} />

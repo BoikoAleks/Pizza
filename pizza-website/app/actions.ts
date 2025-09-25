@@ -16,7 +16,7 @@ import { redirect } from 'next/navigation';
 import Stripe from 'stripe';
 import { z } from 'zod';
 import { revalidatePath } from 'next/cache';
-import { changePasswordSchema, personalDataSchema, productFormSchema, ProductFormValues } from '@/shared/components/shared/modals/auth-modal/forms/schemas';
+import { changePasswordSchema, personalDataSchema } from '@/shared/components/shared/modals/auth-modal/forms/schemas';
 
 
 
@@ -271,6 +271,7 @@ export async function updatePersonalData(
     throw new Error("Не вдалося оновити дані.");
   }
 }
+
 export async function updateUserPassword(
   values: z.infer<typeof changePasswordSchema>
 ) {
@@ -294,11 +295,7 @@ export async function updateUserPassword(
 }
 
 export async function updateOrderStatus(orderId: number, status: OrderStatus) {
-  const session = await getUserSession();
-
-  if (session?.role !== 'MANAGER' && session?.role !== 'ADMIN') {
-    throw new Error('Недостатньо прав');
-  }
+  await checkManagerRole();
 
   try {
     await prisma.order.update({
@@ -308,75 +305,80 @@ export async function updateOrderStatus(orderId: number, status: OrderStatus) {
     revalidatePath('/manager');
   } catch (error) {
     console.error('Error [UPDATE_ORDER_STATUS]', error);
-    throw new Error('Не вдалося оновити статус.');
+    throw Error('Не вдалося оновити статус.');
   }
 }
 
-async function checkManagerRole() {
+
+export async function checkManagerRole() {
   const session = await getUserSession();
   if (session?.role !== 'MANAGER' && session?.role !== 'ADMIN') {
-    throw new Error('Недостатньо прав');
+    throw new Error('Forbidden: Insufficient permissions');
   }
 }
-export async function upsertProduct(data: ProductFormValues) {
-  await checkManagerRole();
 
-  // Валідуємо дані на сервері
-  const validatedData = productFormSchema.parse(data);
-  const { id: productId, items, ingredientIds, ...productData } = validatedData;
 
-  const productPayload = {
-    ...productData,
-    ingredients: {
-      set: ingredientIds?.map(id => ({ id })) || [],
+export async function getChatMessages() {
+  const session = await getUserSession();
+  if (!session?.id) return null;
+
+  const conversation = await prisma.conversation.findUnique({
+    where: { userId: Number(session.id) },
+    include: {
+      messages: {
+        orderBy: { createdAt: "asc" },
+      },
     },
-  };
-
-  if (productId) {
-    // --- ОНОВЛЕННЯ ІСНУЮЧОГО ПРОДУКТУ ---
-    await prisma.product.update({
-      where: { id: productId },
-      data: {
-        ...productPayload,
-        items: {
-          deleteMany: {}, // Спочатку видаляємо старі варіанти
-          create: items.map(({ price, size, pizzaType }) => ({ // Потім створюємо нові
-            price,
-            size,
-            pizzaType,
-          })),
-        },
-      },
-    });
-  } else {
-    // --- СТВОРЕННЯ НОВОГО ПРОДУКТУ ---
-    await prisma.product.create({
-      data: {
-        ...productPayload,
-        items: {
-          create: items.map(({ price, size, pizzaType }) => ({
-            price,
-            size,
-            pizzaType,
-          })),
-        },
-      },
-    });
-  }
-
-  // Оновлюємо кеш, щоб побачити зміни одразу
-  revalidatePath('/manager/menu');
-}
-
-
-// --- ФУНКЦІЯ ДЛЯ ВИДАЛЕННЯ ПРОДУКТУ ---
-export async function deleteProduct(productId: number) {
-  await checkManagerRole();
-
-  // Видаляємо продукт. Prisma автоматично видалить пов'язані ProductItem
-  await prisma.product.delete({
-    where: { id: productId },
   });
 
-  revalidatePath('/manager/menu');
+  return conversation;
+}
+
+
+export async function deleteConversation(conversationId: number) {
+  // Перевірка прав доступу
+  const session = await getUserSession();
+  if (session?.role !== 'MANAGER' && session?.role !== 'ADMIN') {
+    throw new Error('Forbidden: Insufficient permissions');
+  }
+
+  try {
+    // Спочатку видаляємо всі повідомлення, пов'язані з цією розмовою
+    await prisma.message.deleteMany({
+      where: { conversationId: conversationId },
+    });
+    
+    // Потім видаляємо саму розмову
+    await prisma.conversation.delete({
+      where: { id: conversationId },
+    });
+
+    // Оновлюємо кеш сторінки чатів, щоб список оновився
+    revalidatePath('/manager/chat');
+  } catch (error) {
+    console.error("Error [DELETE_CONSERVATION]", error);
+    throw new Error('Не вдалося видалити розмову.');
+  }
+}
+
+
+
+// Позначає розмову як переглянуту менеджером
+export async function markConversationAsViewed(conversationId: number) {
+  const session = await getUserSession();
+  if (session?.role !== 'MANAGER' && session?.role !== 'ADMIN') {
+    return;
+  }
+
+  try {
+    await prisma.conversation.update({
+      where: { id: conversationId },
+      data: { lastViewedByManager: new Date() },
+    });
+
+    revalidatePath('/manager/chat');
+  } catch (error) {
+    // Не кидаємо помилку, щоб не зламати рендеринг сторінки
+    console.error("Failed to mark conversation as viewed:", error);
+  }
 }

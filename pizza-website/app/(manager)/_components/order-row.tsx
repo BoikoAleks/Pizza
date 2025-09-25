@@ -1,4 +1,3 @@
-// ФАЙЛ: app/manager/_components/order-row.tsx
 "use client";
 
 import { useState } from "react";
@@ -13,6 +12,7 @@ interface Props {
   order: OrderWithUserAndItems;
 }
 
+
 export const OrderRow = ({ order }: Props) => {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -20,7 +20,7 @@ export const OrderRow = ({ order }: Props) => {
     <>
       <tr
         onClick={() => setIsOpen(!isOpen)}
-        className="cursor-pointer hover:bg-gray-50"
+        className="cursor-pointer hover:bg-gray-50 "
       >
         <td className="pl-4">
           <ChevronDown
@@ -54,7 +54,7 @@ export const OrderRow = ({ order }: Props) => {
                 {order.items.map((item) => (
                   <li
                     key={item.id}
-                    className="text-sm border-b pb-2 last:border-b-0"
+                    className="text-sm border-b pb-1.5 last:border-b-0"
                   >
                     <div className="font-semibold">
                       {item.productItem.product.name} - {item.quantity} шт.
@@ -67,7 +67,7 @@ export const OrderRow = ({ order }: Props) => {
 
                     {item.productItem.pizzaType && (
                       <div className="text-xs text-gray-600 pl-2">
-                        Тип: {PIZZA_CRUSTS[item.productItem.pizzaType]} бортик
+                        Тип: {PIZZA_CRUSTS[item.productItem.pizzaType]}
                       </div>
                     )}
 
@@ -76,7 +76,7 @@ export const OrderRow = ({ order }: Props) => {
                         <span className="text-xs font-semibold text-gray-700">
                           Додатки:
                         </span>
-                        <ul className="list-disc pl-5 text-xs text-gray-600">
+                        <ul className="list-disc pl-4 text-xs text-gray-600">
                           {item.ingredients.map((ingredient) => (
                             <li key={ingredient.id}>{ingredient.name}</li>
                           ))}
@@ -87,10 +87,14 @@ export const OrderRow = ({ order }: Props) => {
                 ))}
               </ul>
               <div className="mt-4 border-t pt-2">
-                <p className="font-semibold">Адреса доставки:</p>
-                <p className="text-sm text-gray-600">{order.address}</p>
                 <p className="font-semibold mt-2">Телефон:</p>
-                <p className="text-sm text-gray-600">{order.phone}</p>
+                <p className="text-sm text-gray-600 pl-1">{order.phone}</p>
+                <p className="font-semibold">Адреса доставки:</p>
+                <p className="text-sm text-gray-600 pl-1">{order.address}</p>          
+                <p className="font-semibold mt-2">Час доставки:</p>
+                <p className="text-sm text-gray-600 pl-1">{order.deliveryTime}</p>
+                <p className="font-semibold mt-2">Загальна сума:</p>
+                <p className="text-sm text-gray-600 pl-1 ">{order.totalAmount} грн</p>
               </div>
             </div>
           </td>
