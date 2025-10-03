@@ -17,7 +17,7 @@ import Stripe from 'stripe';
 import { z } from 'zod';
 import { revalidatePath } from 'next/cache';
 import { changePasswordSchema, personalDataSchema } from '@/shared/components/shared/modals/auth-modal/forms/schemas';
-
+import { pusherServer } from '@/shared/lib/pusher';
 
 
 export async function createOrder(data: CheckoutFormValues) {
@@ -353,6 +353,13 @@ export async function deleteConversation(conversationId: number) {
       where: { id: conversationId },
     });
 
+    const channelName = `chat-${conversationId}`;
+    const eventName = "conversation-deleted";
+    
+    await pusherServer.trigger(channelName, eventName, {
+      message: "Цей чат було видалено менеджером.",
+    });
+
     // Оновлюємо кеш сторінки чатів, щоб список оновився
     revalidatePath('/manager/chat');
   } catch (error) {
@@ -360,7 +367,6 @@ export async function deleteConversation(conversationId: number) {
     throw new Error('Не вдалося видалити розмову.');
   }
 }
-
 
 
 // Позначає розмову як переглянуту менеджером

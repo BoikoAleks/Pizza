@@ -18,7 +18,7 @@ export const ProductForm: React.FC<Props> = ({
 }) => {
   // Виправляємо виклик useCartStore, щоб уникнути нескінченних циклів
   const addCartItem = useCartStore((state) => state.addCartItem);
-  const loading = useCartStore((state) => state.loading);;
+  const loading = useCartStore((state) => state.loading);
 
   const firstItem = product.items[0];
   const isPizzaForm = Boolean(firstItem?.pizzaType);

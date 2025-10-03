@@ -12,6 +12,7 @@ import { cn } from "@/shared/lib/utils";
 import { useSession } from "next-auth/react";
 import { Message, UserRole } from "@prisma/client";
 import { getChatMessages } from "@/app/actions";
+import { toast } from "react-hot-toast";
 
 interface Props {
   isOpen: boolean;
@@ -38,6 +39,9 @@ export const ChatModal = ({ isOpen, onClose }: Props) => {
         if (conversation) {
           setMessages(conversation.messages);
           setConversationId(conversation.id);
+        } else {
+          setMessages([]);
+          setConversationId(null);
         }
       });
     }
@@ -55,32 +59,41 @@ export const ChatModal = ({ isOpen, onClose }: Props) => {
 
     const handleNewMessage = (newMessage: Message) => {
       setMessages((prevMessages) => {
-        // --- ВИПРАВЛЕННЯ 2: Ігноруємо повідомлення, які вже існують ---
-        // Якщо повідомлення з таким ID вже є, не додаємо його
-        if (newMessage.id && prevMessages.some(msg => msg.id === newMessage.id)) {
+        if (
+          newMessage.id &&
+          prevMessages.some((msg) => msg.id === newMessage.id)
+        ) {
           return prevMessages;
         }
-        // Якщо ми знайшли оптимістичне повідомлення (без ID, але з таким же текстом),
-        // ми його замінюємо на реальне повідомлення з сервера.
-        const optimisticIndex = prevMessages.findIndex(msg => !msg.id && msg.text === newMessage.text);
+        const optimisticIndex = prevMessages.findIndex(
+          (msg) => !msg.id && msg.text === newMessage.text
+        );
         if (optimisticIndex > -1) {
           const updatedMessages = [...prevMessages];
           updatedMessages[optimisticIndex] = newMessage;
           return updatedMessages;
         }
-        // В іншому випадку, це нове повідомлення від менеджера, просто додаємо його
         return [...prevMessages, newMessage];
       });
     };
+    const handleConversationDeleted = () => {
+      toast.error("Цей чат було видалено менеджером.");
+      setMessages([]);
+      setConversationId(null);
+      onClose();
+
+    }
 
     channel.bind("new-message", handleNewMessage);
+    channel.bind("conversation-deleted", handleConversationDeleted);
 
     return () => {
       channel.unbind("new-message", handleNewMessage);
+      channel.unbind("conversation-deleted", handleConversationDeleted);
       pusher.unsubscribe(`chat-${conversationId}`);
       pusher.disconnect();
     };
-  }, [conversationId]);
+  }, [conversationId, onClose]);
 
   useEffect(scrollToBottom, [messages]);
 
@@ -95,15 +108,18 @@ export const ChatModal = ({ isOpen, onClose }: Props) => {
     const tempId = crypto.randomUUID();
 
     // Оптимістичне оновлення UI
-    setMessages(prev => [...prev, {
-      tempId, // <-- Унікальний ID
-      text: tempMessageText,
-      senderRole: session.user.role as UserRole,
-      // Додаємо інші поля, щоб відповідати типу Message
-      id: 0, // тимчасовий
-      conversationId: conversationId || 0,
-      createdAt: new Date(),
-    }]);
+    setMessages((prev) => [
+      ...prev,
+      {
+        tempId, // <-- Унікальний ID
+        text: tempMessageText,
+        senderRole: session.user.role as UserRole,
+        // Додаємо інші поля, щоб відповідати типу Message
+        id: 0, // тимчасовий
+        conversationId: conversationId || 0,
+        createdAt: new Date(),
+      },
+    ]);
 
     await fetch("/api/chat", {
       method: "POST",
@@ -115,7 +131,9 @@ export const ChatModal = ({ isOpen, onClose }: Props) => {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[425px] h-[70vh] flex flex-col bg-card shadow-lg bg-white">
-        <DialogHeader><DialogTitle className="" >Чат з підтримкою</DialogTitle></DialogHeader>
+        <DialogHeader>
+          <DialogTitle className="">Чат з підтримкою</DialogTitle>
+        </DialogHeader>
         <div className="flex-1 overflow-y-auto p-4 space-y-4">
           {messages.map((msg) => {
             const isUserMessage = msg.senderRole === session?.user.role;
@@ -132,10 +150,14 @@ export const ChatModal = ({ isOpen, onClose }: Props) => {
                     <Headset size={18} className="text-muted-foreground" />
                   </div>
                 )}
-                <div className={cn(
-                  "p-3 rounded-lg max-w-[80%] break-words",
-                  isUserMessage ? "bg-primary text-primary-foreground rounded-br-none" : "bg-muted rounded-bl-none"
-                )}>
+                <div
+                  className={cn(
+                    "p-3 rounded-lg max-w-[80%] break-words",
+                    isUserMessage
+                      ? "bg-primary text-primary-foreground rounded-br-none"
+                      : "bg-muted rounded-bl-none"
+                  )}
+                >
                   <p className="text-sm">{msg.text}</p>
                 </div>
                 {isUserMessage && (
@@ -148,9 +170,18 @@ export const ChatModal = ({ isOpen, onClose }: Props) => {
           })}
           <div ref={messagesEndRef} />
         </div>
-        <form onSubmit={handleSendMessage} className="flex gap-2 p-4 border-t bg-card">
-          <Input value={newMessage} onChange={(e) => setNewMessage(e.target.value)} placeholder="Ваше повідомлення..." />
-          <Button type="submit" size="icon"><Send size={18} /></Button>
+        <form
+          onSubmit={handleSendMessage}
+          className="flex gap-2 p-4 border-t bg-card"
+        >
+          <Input
+            value={newMessage}
+            onChange={(e) => setNewMessage(e.target.value)}
+            placeholder="Ваше повідомлення..."
+          />
+          <Button type="submit" size="icon">
+            <Send size={18} />
+          </Button>
         </form>
       </DialogContent>
     </Dialog>

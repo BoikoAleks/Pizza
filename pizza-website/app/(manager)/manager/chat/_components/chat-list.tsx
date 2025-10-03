@@ -28,7 +28,7 @@ export const ChatList = ({ conversations: initialConversations }: Props) => {
   const pathname = usePathname();
   const router = useRouter();
   const activeChatId = pathname?.split("/").pop();
-  
+
   const [isPending, startTransition] = useTransition();
 
   useEffect(() => {
@@ -37,10 +37,12 @@ export const ChatList = ({ conversations: initialConversations }: Props) => {
     });
 
     const channel = pusher.subscribe("manager-chat-list");
-    
+
     const handleUpdate = (updatedConvo: ConversationWithDetails) => {
-      setConversations(prevConvos => {
-        const existingConvoIndex = prevConvos.findIndex(c => c.id === updatedConvo.id);
+      setConversations((prevConvos) => {
+        const existingConvoIndex = prevConvos.findIndex(
+          (c) => c.id === updatedConvo.id
+        );
         const newConvos = [...prevConvos];
 
         if (existingConvoIndex > -1) {
@@ -49,7 +51,10 @@ export const ChatList = ({ conversations: initialConversations }: Props) => {
           newConvos.unshift(updatedConvo);
         }
 
-        return newConvos.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
+        return newConvos.sort(
+          (a, b) =>
+            new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+        );
       });
     };
 
@@ -61,11 +66,16 @@ export const ChatList = ({ conversations: initialConversations }: Props) => {
     };
   }, []); // Пустий масив залежностей, щоб підписка створювалась один раз
 
-  const handleDelete = (convo: ConversationWithDetails, e: React.MouseEvent) => {
+  const handleDelete = (
+    convo: ConversationWithDetails,
+    e: React.MouseEvent
+  ) => {
     e.preventDefault();
     e.stopPropagation();
 
-    if (confirm(`Ви впевнені, що хочете видалити чат з ${convo.user.fullName}?`)) {
+    if (
+      confirm(`Ви впевнені, що хочете видалити чат з ${convo.user.fullName}?`)
+    ) {
       startTransition(async () => {
         try {
           await deleteConversation(convo.id);
@@ -73,7 +83,7 @@ export const ChatList = ({ conversations: initialConversations }: Props) => {
           if (activeChatId === String(convo.id)) {
             router.push("/manager/chat");
           }
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
         } catch (error) {
           toast.error("Не вдалося видалити чат.");
         }
@@ -88,11 +98,13 @@ export const ChatList = ({ conversations: initialConversations }: Props) => {
       )}
       {conversations.map((convo) => {
         const lastMessage = convo.messages[0];
-        const hasUnread = 
+        const hasUnread =
           lastMessage &&
-          lastMessage.senderRole === 'USER' && // Індикатор тільки для повідомлень від клієнта
-          (!convo.lastViewedByManager || new Date(lastMessage.createdAt) > new Date(convo.lastViewedByManager));
-        
+          lastMessage.senderRole === "USER" && // Індикатор тільки для повідомлень від клієнта
+          (!convo.lastViewedByManager ||
+            new Date(lastMessage.createdAt) >
+              new Date(convo.lastViewedByManager));
+
         return (
           <div key={convo.id} className="relative group">
             <Link
@@ -104,21 +116,33 @@ export const ChatList = ({ conversations: initialConversations }: Props) => {
               )}
             >
               <div className="flex justify-between items-center">
-                <span className={cn("font-medium", hasUnread && "font-bold text-primary")}>
+                <span
+                  className={cn(
+                    "font-medium",
+                    hasUnread && "font-bold text-primary"
+                  )}
+                >
                   {convo.user.fullName}
                 </span>
                 {hasUnread && (
                   <div className="w-2.5 h-2.5 bg-primary rounded-full animate-pulse"></div>
                 )}
               </div>
-              <p className={cn("text-sm text-gray-500 truncate", hasUnread && "text-gray-900")}>
+              <p
+                className={cn(
+                  "text-sm text-gray-500 truncate",
+                  hasUnread && "text-gray-900"
+                )}
+              >
                 {lastMessage?.text || "Немає повідомлень"}
               </p>
             </Link>
-            
+
             <Button
               onClick={(e) => handleDelete(convo, e)}
-              variant="ghost" size="icon" disabled={isPending}
+              variant="ghost"
+              size="icon"
+              disabled={isPending}
               className="absolute top-1/2 -translate-y-1/2 right-2 h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-destructive/10 text-destructive"
             >
               <Trash2 size={16} />

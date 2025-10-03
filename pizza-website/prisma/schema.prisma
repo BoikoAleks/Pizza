@@ -137,13 +137,13 @@ model StoryItem {
 }
 
 model Conversation {
-  id        Int       @id @default(autoincrement())
-  userId    Int       @unique
-  user      User      @relation(fields: [userId], references: [id])
-  messages  Message[]
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  lastViewedByManager DateTime? 
+  id                  Int       @id @default(autoincrement())
+  userId              Int       @unique
+  user                User      @relation(fields: [userId], references: [id])
+  messages            Message[]
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+  lastViewedByManager DateTime?
 }
 
 model Message {

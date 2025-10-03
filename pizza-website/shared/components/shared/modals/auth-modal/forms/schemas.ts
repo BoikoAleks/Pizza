@@ -1,13 +1,9 @@
-// FILE: /path/to/your/schemas.ts (ваш існуючий файл)
-
 import { z } from 'zod';
 
-// --- ІСНУЮЧІ СХЕМИ ДЛЯ ЛОГІНУ ТА РЕЄСТРАЦІЇ ---
-
-export const passwordSchema = z.string().min(4, { message: 'Введіть коректний пароль' });
+export const passwordSchema = z.string().min(4, { message: 'Введіть коректну пошту або пароль' });
 
 export const formLoginSchema = z.object({
-  email: z.string().email({ message: 'Введіть коректну пошту' }),
+  email: z.string().email({ message: 'Введіть коректну пошту або пароль' }),
   password: passwordSchema,
 });
 
@@ -26,10 +22,6 @@ export const formRegisterSchema = formLoginSchema
 export type TFormLoginValues = z.infer<typeof formLoginSchema>;
 export type TFormRegisterValues = z.infer<typeof formRegisterSchema>;
 
-
-// --- ДОДАЙТЕ НОВИЙ КОД НИЖЧЕ ---
-
-// --- СХЕМИ ДЛЯ СТОРІНКИ ПРОФІЛЮ ---
 
 export const personalDataSchema = z.object({
   fullName: z.string().min(2, "Введіть повне ім'я"),
@@ -58,8 +50,8 @@ export const productFormSchema = z.object({
   items: z.array(z.object({
     id: z.number().optional(),
     price: z.coerce.number({ error: "Вкажіть ціну" }).min(1, "Вкажіть ціну"),
-    
-    
+
+
     size: z.union([z.coerce.number(), z.null()]).optional().transform(val => val ?? undefined),
     pizzaType: z.union([z.coerce.number(), z.null()]).optional().transform(val => val ?? undefined),
 

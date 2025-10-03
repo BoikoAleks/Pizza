@@ -43,7 +43,7 @@ export const ProfileForm: React.FC<Props> = ({ data }) => {
         icon: "✅",
       });
     } catch (error) {
-        console.error("Помилка під час оновлення даних:", error);
+      console.error("Помилка під час оновлення даних:", error);
       return toast.error("Помилка під час оновлення даних", {
         icon: "❌",
       });
@@ -58,11 +58,7 @@ export const ProfileForm: React.FC<Props> = ({ data }) => {
 
   return (
     <Container className="my-10">
-      <Title
-        text={`Особисті дані`}
-        size="md"
-        className="font-bold"
-      />
+      <Title text={`Особисті дані`} size="md" className="font-bold" />
 
       <FormProvider {...form}>
         <form

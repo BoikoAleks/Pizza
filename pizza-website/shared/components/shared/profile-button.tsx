@@ -23,7 +23,11 @@ export const ProfileButton: React.FC<Props> = ({
   if (status === "loading") {
     return (
       <div className={className}>
-        <Button variant="outline" className="w-[100px] animate-pulse bg-gray-200" disabled />
+        <Button
+          variant="outline"
+          className="w-[100px] animate-pulse bg-gray-200"
+          disabled
+        />
       </div>
     );
   }
@@ -31,14 +35,18 @@ export const ProfileButton: React.FC<Props> = ({
   // Якщо сесія є (користувач авторизований)
   if (session) {
     // 2. Перевіряємо роль користувача
-    const isManager = session.user.role === 'MANAGER' || session.user.role === 'ADMIN';
+    const isManager =
+      session.user.role === "MANAGER" || session.user.role === "ADMIN";
 
     return (
       <div className={className}>
         {isManager ? (
           // Якщо Менеджер або Адмін - показуємо кнопку "Панель менеджера"
           <Link href="/manager">
-            <Button variant="outline" className="flex items-center gap-2 border-primary text-primary hover:bg-primary/10">
+            <Button
+              variant="outline"
+              className="flex items-center gap-2 border-primary text-primary hover:bg-primary/10"
+            >
               <Shield size={18} />
               Панель менеджера
             </Button>

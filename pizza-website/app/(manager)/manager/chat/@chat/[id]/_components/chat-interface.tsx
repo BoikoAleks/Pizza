@@ -6,6 +6,7 @@ import { Send, User, Headset } from "lucide-react";
 import Pusher from "pusher-js";
 import { cn } from "@/shared/lib/utils";
 import { Message } from "@prisma/client";
+import { markConversationAsViewed } from "@/app/actions";
 
 interface Props {
   conversationId: number;
@@ -13,14 +14,24 @@ interface Props {
   userName: string;
 }
 
-export const ChatInterface = ({ conversationId, initialMessages, userName }: Props) => {
+export const ChatInterface = ({
+  conversationId,
+  initialMessages,
+  userName,
+}: Props) => {
   const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [newMessage, setNewMessage] = useState("");
   const messagesContainerRef = useRef<HTMLDivElement>(null);
 
+  // Позначаємо чат як переглянутий в фоновому режимі
+  useEffect(() => {
+    markConversationAsViewed(conversationId);
+  }, [conversationId]);
+
   const scrollToBottom = () => {
     if (messagesContainerRef.current) {
-      messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
+      messagesContainerRef.current.scrollTop =
+        messagesContainerRef.current.scrollHeight;
     }
   };
 
@@ -34,13 +45,13 @@ export const ChatInterface = ({ conversationId, initialMessages, userName }: Pro
 
     const handleNewMessage = (newMessage: Message) => {
       setMessages((prevMessages) => {
-        if (prevMessages.some(msg => msg.id === newMessage.id)) {
+        if (prevMessages.some((msg) => msg.id === newMessage.id)) {
           return prevMessages;
         }
         return [...prevMessages, newMessage];
       });
     };
-    
+
     channel.bind("new-message", handleNewMessage);
 
     return () => {
@@ -71,7 +82,7 @@ export const ChatInterface = ({ conversationId, initialMessages, userName }: Pro
         }),
       });
     } catch (error) {
-        console.error("Failed to send message:", error);
+      console.error("Failed to send message:", error);
     }
   };
 
@@ -92,7 +103,10 @@ export const ChatInterface = ({ conversationId, initialMessages, userName }: Pro
           return (
             <div
               key={msg.id || `temp-${index}`}
-              className={cn("flex items-end gap-2", isManagerMessage ? "justify-end" : "justify-start")}
+              className={cn(
+                "flex items-end gap-2",
+                isManagerMessage ? "justify-end" : "justify-start"
+              )}
             >
               {!isManagerMessage && (
                 <div className="flex-shrink-0 w-8 h-8 rounded-full bg-muted flex items-center justify-center">
@@ -100,8 +114,11 @@ export const ChatInterface = ({ conversationId, initialMessages, userName }: Pro
                 </div>
               )}
               <div
-                className={cn("p-3 rounded-lg max-w-[80%] break-words",
-                  isManagerMessage ? "bg-primary text-primary-foreground rounded-br-none" : "bg-muted rounded-bl-none"
+                className={cn(
+                  "p-3 rounded-lg max-w-[80%] break-words",
+                  isManagerMessage
+                    ? "bg-primary text-primary-foreground rounded-br-none"
+                    : "bg-muted rounded-bl-none"
                 )}
               >
                 <p className="text-base">{msg.text}</p>
@@ -117,14 +134,19 @@ export const ChatInterface = ({ conversationId, initialMessages, userName }: Pro
       </div>
 
       {/* Статична форма відправки */}
-      <form onSubmit={handleSendMessage} className="flex gap-2 p-4 border-t bg-card flex-shrink-0">
+      <form
+        onSubmit={handleSendMessage}
+        className="flex gap-2 p-4 border-t bg-card flex-shrink-0"
+      >
         <Input
           value={newMessage}
           onChange={(e) => setNewMessage(e.target.value)}
           placeholder="Відповісти клієнту..."
           autoComplete="off"
         />
-        <Button type="submit" size="icon"><Send size={18} /></Button>
+        <Button type="submit" size="icon">
+          <Send size={18} />
+        </Button>
       </form>
     </div>
   );

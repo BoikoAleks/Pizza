@@ -3,6 +3,7 @@ import { Title } from "@/shared/components/shared/title";
 import { ManagerNav } from "./_components/manager-nav";
 import { checkManagerRole } from "@/shared/lib/check-manager-role.";
 import { SignOutButton } from "@/shared/components/shared/sign-out-button";
+import { ManagerNotificationHandler } from "./manager/chat/_components/manager-notification";
 
 export default async function ManagerLayout({
   children,
@@ -27,6 +28,7 @@ export default async function ManagerLayout({
       <main className="py-10">
         <Container>{children}</Container>
       </main>
+      <ManagerNotificationHandler />
     </div>
   );
 }
