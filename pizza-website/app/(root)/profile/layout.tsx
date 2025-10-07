@@ -16,7 +16,11 @@ export default async function ProfileLayout({
 
   return (
     <Container className="my-10">
-      <Title text="Особистий кабінет" size="lg" className="font-extrabold" />
+      <Title
+        text="Особистий кабінет"
+        size="lg"
+        className="font-extrabold"
+      />
 
       <div className="grid grid-cols-1 md:grid-cols-12 gap-10 mt-10">
         <aside className="col-span-1 md:col-span-3">

@@ -21,7 +21,7 @@ export const ProfileSidebar = () => {
 
   return (
     <div className="border rounded-2xl p-2">
-      <ul className="space-y-1">
+      <ul className="space-y-1 ">
         {sidebarLinks.map(({ href, text, Icon }) => (
           <li key={href}>
             <Link

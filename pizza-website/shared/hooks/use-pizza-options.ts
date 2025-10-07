@@ -1,5 +1,5 @@
 import { PizzaSize, PizzaType } from "@/shared/constants/pizza";
-import React from "react";
+import React, { useMemo, useEffect } from "react"; // Додаємо useMemo та useEffect
 import { useSet } from "react-use";
 import { getAvailablePizzaSizes } from "../lib";
 import { ProductItem } from "@prisma/client";
@@ -19,24 +19,35 @@ interface ReturnProps {
 export const usePizzaOptions = (items: ProductItem[]): ReturnProps => {
   const [size, setSize] = React.useState<PizzaSize>(20);
   const [type, setType] = React.useState<PizzaType>(1);
-  const [selectedIngredients, { toggle: addIngredient }] = useSet(
-    new Set<number>([])
-  );
+  const [selectedIngredients, { toggle: addIngredient }] = useSet(new Set<number>([]));
 
-  const availableSizes = getAvailablePizzaSizes(type, items);
+  // --- ОПТИМІЗАЦІЯ 1: Мемоізуємо розрахунок доступних розмірів ---
+  // Цей блок буде виконуватись тільки тоді, коли змінюється `type` або `items`
+  const availableSizes = useMemo(() => {
+    return getAvailablePizzaSizes(type, items);
+  }, [type, items]);
 
-  const currentItemId = items.find((item) => item.pizzaType === type && item.size === size)?.id;
+  // --- ОПТИМІЗАЦІЯ 2: Мемоізуємо пошук поточного варіанту ---
+  // Цей блок буде виконуватись тільки тоді, коли змінюється `type` або `size`
+  const currentItemId = useMemo(() => {
+    return items.find((item) => item.pizzaType === type && item.size === size)?.id;
+  }, [type, size, items]);
 
-  React.useEffect(() => {
-    const isAvailableSize = availableSizes?.find(
-      (item) => Number(item.value) === size && !item.disabled,
+  // --- ЛОГІКА ПЕРЕКЛЮЧЕННЯ РОЗМІРУ (залишається в useEffect) ---
+  // Цей ефект, як і раніше, відповідає за автоматичний вибір доступного розміру
+  useEffect(() => {
+    const isCurrentSizeAvailable = availableSizes.some(
+      (item) => Number(item.value) === size && !item.disabled
     );
-    const availableSize = availableSizes?.find((item) => !item.disabled);
 
-    if (!isAvailableSize && availableSize) {
-      setSize(Number(availableSize.value) as PizzaSize);
+    // Якщо поточний розмір став недоступним, обираємо перший доступний
+    if (!isCurrentSizeAvailable) {
+      const firstAvailableSize = availableSizes.find((item) => !item.disabled);
+      if (firstAvailableSize) {
+        setSize(Number(firstAvailableSize.value) as PizzaSize);
+      }
     }
-  }, [type]);
+  }, [type, size, availableSizes]); // Залежність від `size` важлива, щоб уникнути зациклення
 
   return {
     size,

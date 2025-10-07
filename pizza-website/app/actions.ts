@@ -97,7 +97,7 @@ export async function createOrder(data: CheckoutFormValues) {
       },
     });
 
-    const paymentUrl = 'https://payment.url/confirm/'; // Це заглушка, ймовірно ви її заміните
+    const paymentUrl = `${process.env.NEXT_PUBLIC_APP_URL}/payment/${order.id}`;
 
     await sendEmail(
       data.email,
@@ -108,6 +108,40 @@ export async function createOrder(data: CheckoutFormValues) {
         paymentUrl,
       }),
     );
+
+    // Create Stripe Checkout session immediately so client can be redirected right away
+    try {
+      const StripeLib = require('stripe');
+      const stripeLocal = new StripeLib(process.env.STRIPE_SECRET_KEY!);
+
+      const checkoutSession = await stripeLocal.checkout.sessions.create({
+        payment_method_types: ['card'],
+        line_items: [
+          {
+            price_data: {
+              currency: 'uah',
+              product_data: {
+                name: `Замовлення #${order.id}`,
+                description: `Оплата замовлення в Pizza Republic`,
+              },
+              unit_amount: order.totalAmount * 100,
+            },
+            quantity: 1,
+          },
+        ],
+        mode: 'payment',
+        success_url: `${process.env.NEXT_PUBLIC_APP_URL}/?paidOrder=${order.id}`,
+        cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/payment/cancel`,
+        metadata: { orderId: order.id },
+      });
+
+      if (checkoutSession.url) {
+        return checkoutSession.url;
+      }
+    } catch (err) {
+      console.log('[createOrder] Stripe session creation failed', err);
+      // fall back to internal payment page
+    }
 
     return paymentUrl;
   } catch (err) {

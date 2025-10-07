@@ -45,8 +45,10 @@ export default function CheckoutPage() {
       lastName: "",
       phone: "",
       address: "",
+      houseNumber: "",
+      apartment: "",
       comment: "",
-      deliveryTime: "", // Додано початкове значення
+      deliveryTime: "", 
     },
   });
 

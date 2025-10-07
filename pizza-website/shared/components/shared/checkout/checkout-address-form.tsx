@@ -62,6 +62,8 @@ export const CheckoutAddressForm: React.FC<Props> = ({ className }) => {
     setPredictions([]);
   };
 
+  const showHouseApartment = !!streetAddress && streetAddress.trim().length > 0;
+
   return (
     <WhiteBlock title="3. Інформація про доставку" className={cn(className)}>
       <div className="flex flex-col gap-5">
@@ -105,6 +107,35 @@ export const CheckoutAddressForm: React.FC<Props> = ({ className }) => {
           )}
         </div>
       </div>
+      {showHouseApartment && (
+        <div className="grid grid-cols-2 gap-4 mt-4">
+          <FormField
+            control={control}
+            name="houseNumber"
+            render={({ field }) => (
+              <FormItem>
+                <FormControl>
+                  <Input {...field} placeholder="Номер будинку" />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={control}
+            name="apartment"
+            render={({ field }) => (
+              <FormItem>
+                <FormControl>
+                  <Input {...field} placeholder="Квартира / Під'їзд" />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+      )}
 
       <FormField
         control={control}

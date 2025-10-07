@@ -14,6 +14,7 @@ interface Props {
   className?: string;
   listClassName?: string;
   categoryId: number;
+  
 }
 
 export const ProductGroupList: React.FC<Props> = ({
@@ -22,6 +23,7 @@ export const ProductGroupList: React.FC<Props> = ({
   className,
   listClassName,
   categoryId,
+  
 }) => {
   const setActiveCategoryId = useCategoryStore((state) => state.setActiveId);
 

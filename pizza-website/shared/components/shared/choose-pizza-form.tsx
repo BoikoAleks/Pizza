@@ -1,6 +1,7 @@
+// ФАЙЛ: /path/to/ChoosePizzaForm.tsx
 "use client";
 
-import React from "react";
+import React, { useMemo } from "react"; // <-- Важливо додати `useMemo`
 import { Title } from "./title";
 import { Button } from "../ui";
 import { PizzaImage } from "./pizza-image";
@@ -22,12 +23,6 @@ interface Props {
   onSubmit: (itemId: number, ingredients: number[]) => void;
 }
 
-
-
-/**
- * Форма вибору піци
- */
-
 export const ChoosePizzaForm: React.FC<Props> = ({
   name,
   items,
@@ -47,24 +42,21 @@ export const ChoosePizzaForm: React.FC<Props> = ({
     addIngredient,
     availableSizes,
   } = usePizzaOptions(items);
-  const { totalPrice, textDetails } = getPizzaDetails(
-    type,
-    size,
-    items,
-    ingredients,
-    selectedIngredients
-  );
 
-  React.useEffect(() => {
-    const isAvailableSize = availableSizes.find(
-      (item) => Number(item.value) === size && !item.disabled
+  // --- ОПТИМІЗАЦІЯ 3: Мемоізуємо фінальні розрахунки ціни та опису ---
+  // Цей блок буде викликатись тільки тоді, коли змінюється одна з його залежностей
+  const { totalPrice, textDetails } = useMemo(() => {
+    return getPizzaDetails(
+      type,
+      size,
+      items,
+      ingredients,
+      selectedIngredients
     );
-    const availableSize = availableSizes?.find((item) => !item.disabled);
+  }, [type, size, items, ingredients, selectedIngredients]);
 
-    if (!isAvailableSize && availableSize) {
-      setSize(Number(availableSize.value) as PizzaSize);
-    }
-  }, [type, setSize, size, availableSizes]);
+  // `useEffect` з `usePizzaOptions` вже обробляє логіку переключення розмірів,
+  // тому тут ми його більше не дублюємо.
 
   const handleClickAdd = () => {
     if (currentItemId) {
@@ -97,14 +89,10 @@ export const ChoosePizzaForm: React.FC<Props> = ({
           </div>
 
           <div className="mt-4">
-            <Title
-              text="Додати інгредієнти"
-              size="sm"
-              className="mb-4 font-bold"
-            />
+            <Title text="Додати інгредієнти" size="sm" className="mb-4 font-bold" />
           </div>
 
-          <div className="grid grid-cols-3 gap-3 ">
+          <div className="grid grid-cols-[repeat(auto-fill,minmax(120px,1fr))] gap-3">
             {ingredients.map((ingredient) => (
               <IngredientItem
                 key={ingredient.id}
@@ -121,7 +109,10 @@ export const ChoosePizzaForm: React.FC<Props> = ({
         <div className="mt-auto pt-8">
           <Button
             loading={loading}
-            onClick={handleClickAdd} className="h-14 text-base w-full">
+            onClick={handleClickAdd}
+            disabled={!currentItemId || loading} // Додаємо перевірку, щоб не можна було додати неіснуючий варіант
+            className="h-14 text-base w-full"
+          >
             Додати до кошика за {totalPrice} грн
           </Button>
         </div>

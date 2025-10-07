@@ -31,7 +31,7 @@ export const IngredientItem: React.FC<Props> = ({
       onClick={onClick}
     >
       {active && (
-        <CircleCheck className="absolute top-2 right-2 text-[var(--primary)" />
+        <CircleCheck className="absolute top-2 right-2 text-[var(--primary)]" />
       )}
       <Image src={imageUrl} alt="ingredients" width={100} height={100} />
       <span className="text-xs mb-1">{name}</span>

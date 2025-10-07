@@ -46,10 +46,9 @@ export const ChooseProductForm: React.FC<Props> = ({
         {ingredients && ingredients.length > 0 && (
           <p className="text-sm text-gray-500">
             {ingredients.map((ingredient) => ingredient.name).join(", ")}
-
           </p>
         )}
-        
+
         <Button
           loading={loading}
           onClick={() => onSubmit?.()}

@@ -7,8 +7,7 @@ import { Container } from "./container";
 import { cn } from "@/shared/lib/utils";
 import { X } from "lucide-react";
 import { IStory } from "@/shared/services/stories";
-import ReactStories from 'react-insta-stories';
-
+import ReactStories from "react-insta-stories";
 
 interface Props {
   className?: string;
@@ -18,6 +17,7 @@ export const Stories: React.FC<Props> = ({ className }) => {
   const [stories, setStories] = React.useState<IStory[]>([]);
   const [open, setOpen] = React.useState(false);
   const [selectedStory, setSelectedStory] = React.useState<IStory>();
+  const [modalSize, setModalSize] = React.useState<{ width: number; height: number } | null>(null);
 
   /* Запит до сторіс */
   React.useEffect(() => {
@@ -34,9 +34,34 @@ export const Stories: React.FC<Props> = ({ className }) => {
     setSelectedStory(story);
 
     if (story.items.length > 0) {
-      setOpen(true);
+      // preload first image to get natural dimensions
+      const img = new Image();
+      img.onload = () => {
+        const maxW = window.innerWidth * 0.95;
+        const maxH = window.innerHeight * 0.95;
+        let w = img.naturalWidth;
+        let h = img.naturalHeight;
+        const ratio = Math.min(maxW / w, maxH / h, 1);
+        w = Math.round(w * ratio);
+        h = Math.round(h * ratio);
+        setModalSize({ width: w, height: h });
+        setOpen(true);
+      };
+      img.src = story.items[0].sourceUrl;
     }
   };
+
+  // Lock scroll while modal is open
+  React.useEffect(() => {
+    if (open) {
+      const prev = document.body.style.overflow;
+      document.body.style.overflow = "hidden";
+      return () => {
+        document.body.style.overflow = prev || "";
+      };
+    }
+    return;
+  }, [open]);
 
   return (
     /* Розмітка */
@@ -67,25 +92,33 @@ export const Stories: React.FC<Props> = ({ className }) => {
         ))}
 
         {open && (
-          <div className="absolute left-0 top-0 w-full h-full bg-black/80 flex items-center justify-center z-30">
-            <div className="relative" style={{ width: 520 }}>
+          <div className="fixed left-0 top-0 w-full h-full bg-black/80 flex items-center justify-center z-50">
+            <div
+              className="relative bg-transparent"
+              style={{ width: modalSize?.width ?? 520, height: modalSize?.height ?? 800 }}
+            >
               <button
-                className="absolute -right-10 -top-5 z-30"
-                onClick={() => setOpen(false)}
+                className="absolute top-2 right-2 z-50 p-1"
+                onClick={() => {
+                  setOpen(false);
+                  setModalSize(null);
+                }}
+                aria-label="Close stories"
               >
-                <X className="absolute top-0 right-0 w-8 h-8 text-white/50" />
+                <X className="w-8 h-8 text-white/80" />
               </button>
 
               <ReactStories
-                onAllStoriesEnd={() => setOpen(false)}
+                onAllStoriesEnd={() => {
+                  setOpen(false);
+                  setModalSize(null);
+                }}
                 stories={
-                  selectedStory?.items.map((item) => ({
-                    url: item.sourceUrl,
-                  })) || []
+                  selectedStory?.items.map((item) => ({ url: item.sourceUrl })) || []
                 }
                 defaultInterval={3000}
-                width={520}
-                height={800}
+                width={modalSize?.width ?? 520}
+                height={modalSize?.height ?? 800}
               />
             </div>
           </div>
