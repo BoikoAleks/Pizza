@@ -8,6 +8,8 @@ interface Props {
   totalAmount: number;
   className?: string;
   loading: boolean;
+  deliveryMethod?: 'delivery' | 'pickup';
+  deliveryPrice?: number;
 }
 
 const DELIVERY_PRICE = 100;
@@ -16,6 +18,8 @@ export const CheckoutSidebar: React.FC<Props> = ({
   className,
   totalAmount,
   loading,
+  deliveryMethod = 'delivery',
+  deliveryPrice = DELIVERY_PRICE,
 }) => {
   return (
     <WhiteBlock className={cn("p-6 sticky top-4", className)}>
@@ -25,7 +29,7 @@ export const CheckoutSidebar: React.FC<Props> = ({
           <Skeleton className="h-11 w-48" />
         ) : (
           <span className="h-11 text-[34px] font-bold">
-            {totalAmount + DELIVERY_PRICE} грн
+            {deliveryMethod === 'delivery' ? totalAmount + deliveryPrice : totalAmount} грн
           </span>
         )}
       </div>
@@ -45,21 +49,24 @@ export const CheckoutSidebar: React.FC<Props> = ({
           )
         }
       />
-      <CheckoutItemDetails
-        title={
-          <div className="flex items-center ">
-            <Truck size={18} className="mr-2 text-gray-400" />
-            Вартість доставки:
-          </div>
-        }
-        value={
-          loading ? (
-            <Skeleton className="h-6 w-14 rounded-[6px]" />
-          ) : (
-            `${DELIVERY_PRICE} грн`
-          )
-        }
-      />
+      {deliveryMethod === 'delivery' && (
+        <CheckoutItemDetails
+          title={
+            <div className="flex items-center ">
+              <Truck size={18} className="mr-2 text-gray-400" />
+              Вартість доставки:
+            </div>
+          }
+          value={
+            loading ? (
+              <Skeleton className="h-6 w-14 rounded-[6px]" />
+            ) : (
+              `${deliveryPrice} грн`
+            )
+          }
+        />
+      )}
+      {/* When pickup is selected we don't show an extra delivery line */}
 
       <Button
         loading={loading}

@@ -58,6 +58,40 @@ export async function createOrder(data: CheckoutFormValues) {
       throw new Error('Cart is empty');
     }
 
+    // Determine delivery fee and compute final total
+    const DELIVERY_FEE = 100;
+    const isDelivery = data.deliveryMethod === 'delivery';
+    const finalTotal = userCart.totalAmount + (isDelivery ? DELIVERY_FEE : 0);
+
+    // Prepare delivery timestamp: if deliveryTime is provided as HH:MM, convert to ISO for today or next day if time passed
+    let deliveryTimestamp: string | undefined = undefined;
+    if (data.deliveryTime) {
+      // data.deliveryTime is either 'HH:MM' or empty
+      const parts = data.deliveryTime.split(':');
+      if (parts.length === 2) {
+        const now = new Date();
+        const target = new Date(now);
+        target.setHours(Number(parts[0]));
+        target.setMinutes(Number(parts[1]));
+        target.setSeconds(0);
+        // if target earlier than now, assume next day
+        if (target.getTime() <= now.getTime()) {
+          target.setDate(target.getDate() + 1);
+        }
+        deliveryTimestamp = target.toISOString();
+      } else {
+        // fallback: store raw string
+        deliveryTimestamp = data.deliveryTime;
+      }
+    }
+
+    // Build a full address string including house number and apartment if provided
+    const addressParts: string[] = [];
+    if (data.address) addressParts.push(String(data.address).trim());
+    if (data.houseNumber) addressParts.push(String(data.houseNumber).trim());
+    if (data.apartment) addressParts.push(`кв. ${String(data.apartment).trim()}`);
+    const fullAddress = addressParts.join(', ');
+
     // Створюємо замовлення
     const order = await prisma.order.create({
       data: {
@@ -65,14 +99,14 @@ export async function createOrder(data: CheckoutFormValues) {
         fullName: data.firstName + ' ' + data.lastName,
         email: data.email,
         phone: data.phone,
-        address: data.address,
+        address: fullAddress,
         comment: data.comment,
-        totalAmount: userCart.totalAmount,
+        totalAmount: finalTotal,
         status: OrderStatus.PENDING,
         items: JSON.stringify(userCart.items),
+        deliveryTime: deliveryTimestamp ?? undefined,
 
         // ДОДАЄМО ID КОРИСТУВАЧА, ЯКЩО ВІН АВТОРИЗОВАНИЙ
-
         userId: session?.id ? Number(session.id) : undefined,
       },
     });

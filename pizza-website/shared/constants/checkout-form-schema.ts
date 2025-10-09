@@ -5,11 +5,12 @@ export const checkoutFormSchema = z.object({
     lastName: z.string().min(2, { message:'Прізвище повинно мати не менше 2-х символів' }),
     email: z.string().email({ message: 'Введіть корректну електронну пошту' }),
     phone: z.string().min(10, { message: 'Введіть корректний номер телефону' }),
-    address: z.string().min(5,),
+    address: z.string().min(5, { message: 'Введіть коректну адресу (вулиця та номер)' }),
     houseNumber: z.string().optional(),
     apartment: z.string().optional(),
     comment: z.string().optional(),
-    deliveryTime: z.string().min(1),
+    deliveryTime: z.string().min(1, { message: "Оберіть час доставки" }),
+    deliveryMethod: z.enum(['delivery','pickup']).optional(),
 });
 
 export type CheckoutFormValues = z.infer<typeof checkoutFormSchema>; 

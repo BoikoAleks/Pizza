@@ -19,24 +19,38 @@ const formatTime = (date: Date) => {
 };
 
 export const CheckoutTimeSelection = ({ className }: Props) => {
-  const { control, setValue, clearErrors } =
+  const { control, setValue, clearErrors, watch } =
     useFormContext<CheckoutFormValues>();
   const [timeOption, setTimeOption] = useState<"asap" | "later">("asap");
+  const watchedDeliveryTime = watch("deliveryTime");
 
-  // Використовуємо useEffect для встановлення початкового значення
   useEffect(() => {
-    const asapTime = new Date(new Date().getTime() + 60 * 60 * 1000);
-    setValue("deliveryTime", `~ ${formatTime(asapTime)} (Якнайшвидше)`, {
+    // ASAP = now + 30 minutes (preparation time), rounded to 5 minutes
+    const now = new Date();
+    const asapMs = now.getTime() + 30 * 60 * 1000;
+    const asap = new Date(asapMs);
+    // round to nearest 5 minutes
+    const minutes = asap.getMinutes();
+    const rounded = Math.ceil(minutes / 5) * 5;
+    asap.setMinutes(rounded);
+    asap.setSeconds(0);
+    setValue("deliveryTime", formatTime(asap), {
       shouldValidate: true,
     });
   }, [setValue]);
 
   const handleTimeOptionChange = (option: "asap" | "later") => {
     setTimeOption(option);
-    clearErrors("deliveryTime"); // Очищуємо помилку при зміні опції
+    clearErrors("deliveryTime"); 
     if (option === "asap") {
-      const asapTime = new Date(new Date().getTime() + 60 * 60 * 1000);
-      setValue("deliveryTime", `~ ${formatTime(asapTime)} (Якнайшвидше)`, {
+      const now = new Date();
+      const asapMs = now.getTime() + 30 * 60 * 1000;
+      const asapTime = new Date(asapMs);
+      const minutes = asapTime.getMinutes();
+      const rounded = Math.ceil(minutes / 5) * 5;
+      asapTime.setMinutes(rounded);
+      asapTime.setSeconds(0);
+      setValue("deliveryTime", formatTime(asapTime), {
         shouldValidate: true,
       });
     } else {
@@ -47,7 +61,7 @@ export const CheckoutTimeSelection = ({ className }: Props) => {
   return (
     <WhiteBlock title="4. Час доставки" className={cn(className)}>
       <div className="flex flex-col gap-5">
-        <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-3">
           <button
             type="button"
             onClick={() => handleTimeOptionChange("asap")}
@@ -58,7 +72,10 @@ export const CheckoutTimeSelection = ({ className }: Props) => {
                 : "bg-white hover:bg-gray-50 border-gray-200"
             )}
           >
-            Якнайшвидше
+            <div className="flex flex-col">
+              <span className="font-semibold">Якнайшвидше</span>
+              <span className="text-sm text-gray-500">приблизно {watchedDeliveryTime}</span>
+            </div>
           </button>
           <button
             type="button"

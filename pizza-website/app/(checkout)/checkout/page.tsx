@@ -23,9 +23,9 @@ import { cn } from "@/shared/lib/utils";
 import { CheckoutTimeSelection } from "@/shared/components/shared/checkout/checkout-time-selection";
 
 const PICKUP_POINTS = [
-  { id: 1, name: "Наше кафе на Хрещатику", address: "м. Київ, вул. Хрещатик, 1" },
-  { id: 2, name: "Кав'ярня 'Затишок'", address: "м. Київ, вул. Велика Васильківська, 5" },
-  { id: 3, name: "Пункт видачі 'Швидко'", address: "м. Київ, просп. Перемоги, 22" },
+  { id: 1, name: "Republic cafe", address: "м. Чернівці, вул. Головна, 125" },
+  { id: 2, name: "Republic", address: "м. Чернівці, вул. Богдана Хмельницького, 56" },
+  { id: 3, name: "Republic", address: "м. Чернівці, просп. Незалежності, 222" },
 ];
 
 export default function CheckoutPage() {
@@ -132,27 +132,46 @@ export default function CheckoutPage() {
                     type="button"
                     onClick={() => handleDeliveryMethodChange("delivery")}
                     className={cn(
-                      "flex-1 p-3 rounded-lg text-center transition-colors border",
+                      "flex-1 p-3 rounded-lg text-center transition-colors border flex items-center justify-center gap-2",
                       deliveryMethod === "delivery"
-                        ? "bg-black text-white border-black font-semibold"
+                        ? "bg-yellow-50 text-black border-yellow-300 font-semibold shadow-sm"
                         : "bg-white hover:bg-gray-50 border-gray-200"
                     )}
                   >
-                    Доставка
+                    <div className="flex flex-col items-center">
+                      <div className="flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-yellow-600" viewBox="0 0 20 20" fill="currentColor">
+                          <path d="M3 3h10v4H3V3zm0 6h10v8H3V9zm12-1h2l1 3h-3V8z" />
+                        </svg>
+                        <span className="font-semibold">Доставка</span>
+                      </div>
+                      <span className="text-sm text-gray-500">Доставка кур'єром — 100 грн</span>
+                    </div>
                   </button>
                   <button
                     type="button"
                     onClick={() => handleDeliveryMethodChange("pickup")}
                     className={cn(
-                      "flex-1 p-3 rounded-lg text-center transition-colors border",
+                      "flex-1 p-3 rounded-lg text-center transition-colors border flex items-center justify-center gap-2",
                       deliveryMethod === "pickup"
-                        ? "bg-black text-white border-black font-semibold"
+                        ? "bg-yellow-50 text-black border-yellow-300 font-semibold shadow-sm"
                         : "bg-white hover:bg-gray-50 border-gray-200"
                     )}
                   >
-                    Самовивіз
+                    <div className="flex flex-col items-center">
+                      <div className="flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-yellow-600" viewBox="0 0 20 20" fill="currentColor">
+                          <path d="M5 3a1 1 0 00-1 1v9a3 3 0 003 3h7a3 3 0 003-3V7a1 1 0 00-1-1h-2l-1-2H8L7 3H5z" />
+                        </svg>
+                        <span className="font-semibold">Самовивіз</span>
+                      </div>
+                      <span className="text-sm text-gray-500">Забирайте самі — без вартості доставки</span>
+                      
+                    </div>
                   </button>
                 </div>
+                {/* Hidden input so the server receives deliveryMethod */}
+                <input type="hidden" name="deliveryMethod" value={deliveryMethod} />
               </div>
 
               {/* Умовний рендеринг форми адреси або точок самовивозу */}
@@ -167,7 +186,7 @@ export default function CheckoutPage() {
                 />
               )}
 
-              {/* НОВИЙ КОМПОНЕНТ: Вибір часу */}
+              
               <CheckoutTimeSelection
                 className={loading ? "opacity-40 pointer-events-none" : ""}
               />
@@ -178,6 +197,7 @@ export default function CheckoutPage() {
               <CheckoutSidebar
                 totalAmount={totalAmount}
                 loading={loading || submitting}
+                deliveryMethod={deliveryMethod}
               />
             </div>
           </div>

@@ -86,8 +86,8 @@ export const OrderRow = ({ order }: Props) => {
                   </li>
                 ))}
               </ul>
-              <div className="mt-4 border-t pt-2">
-                <p className="font-semibold mt-2">Телефон:</p>
+              <div className="mt-4 border-t pt-2 focus-visible:ring-[var(--ring)] ">
+                <p className="font-semibold mt-2 focus-visible:ring-[var(--ring)]">Телефон:</p>
                 <p className="text-sm text-gray-600 pl-1">{order.phone}</p>
                 <p className="font-semibold">Адреса доставки:</p>
                 <p className="text-sm text-gray-600 pl-1">{order.address}</p>          
