@@ -6,7 +6,13 @@ import { OrderStatus } from "@prisma/client";
 export default async function ManagerActiveOrdersPage() {
   const activeOrders = await getOrdersWithParsedItems({
     where: {
-      status: OrderStatus.PENDING,
+      status: {
+        in: [
+          OrderStatus.PENDING,
+          "PREPARING" as OrderStatus,
+          "ON_THE_WAY" as OrderStatus,
+        ],
+      },
     },
   });
 

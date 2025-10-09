@@ -8,7 +8,6 @@ import {
 } from "@stripe/react-stripe-js";
 import convertToSubcurrency from "@/shared/lib/convertToSubcurrency";
 
-
 const CheckoutPage = ({ amount }: { amount: number }) => {
   const stripe = useStripe();
   const elements = useElements();

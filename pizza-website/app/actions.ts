@@ -2,15 +2,11 @@
 
 import { prisma } from '@/prisma/prisma-client';
 import { PayOrderTemplate, VerificationUserTemplate } from '@/shared/components/shared/email-templates';
-
-
 import { CheckoutFormValues } from '@/shared/constants';
 import { sendEmail } from '@/shared/lib';
 import { getUserSession } from '@/shared/lib/get-user-session';
-
 import { OrderStatus, Prisma } from '@prisma/client';
 import { hashSync } from 'bcrypt';
-
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import Stripe from 'stripe';
@@ -29,7 +25,7 @@ export async function createOrder(data: CheckoutFormValues) {
       throw new Error('Cart token not found');
     }
 
-    // === КРОК 1: ОТРИМУЄМО СЕСІЮ ПОТОЧНОГО КОРИСТУВАЧА ===
+    //  ОТРИМУЄМО СЕСІЮ ПОТОЧНОГО КОРИСТУВАЧА
     const session = await getUserSession();
 
     // Знаходимо корзину по токену
@@ -75,8 +71,8 @@ export async function createOrder(data: CheckoutFormValues) {
         status: OrderStatus.PENDING,
         items: JSON.stringify(userCart.items),
 
-        // === КРОК 2: ДОДАЄМО ID КОРИСТУВАЧА, ЯКЩО ВІН АВТОРИЗОВАНИЙ ===
-        // Це головне виправлення.
+        // ДОДАЄМО ID КОРИСТУВАЧА, ЯКЩО ВІН АВТОРИЗОВАНИЙ
+
         userId: session?.id ? Number(session.id) : undefined,
       },
     });
@@ -109,7 +105,7 @@ export async function createOrder(data: CheckoutFormValues) {
       }),
     );
 
-    // Create Stripe Checkout session immediately so client can be redirected right away
+
     try {
       const StripeLib = require('stripe');
       const stripeLocal = new StripeLib(process.env.STRIPE_SECRET_KEY!);
@@ -140,13 +136,13 @@ export async function createOrder(data: CheckoutFormValues) {
       }
     } catch (err) {
       console.log('[createOrder] Stripe session creation failed', err);
-      // fall back to internal payment page
+
     }
 
     return paymentUrl;
   } catch (err) {
     console.log('[CreateOrder] Server error', err);
-    // Важливо повертати або обробляти помилку, щоб клієнт знав про неї
+
     throw new Error('Failed to create order.');
   }
 }
@@ -182,7 +178,7 @@ export async function createCheckoutSession(formData: FormData) {
             name: `Замовлення #${order.id}`,
             description: `Оплата замовлення в Pizza Republic`,
           },
-          // Ціна має бути в копійках!
+
           unit_amount: order.totalAmount * 100,
         },
         quantity: 1,
@@ -332,11 +328,26 @@ export async function updateOrderStatus(orderId: number, status: OrderStatus) {
   await checkManagerRole();
 
   try {
-    await prisma.order.update({
+    const updatedOrder = await prisma.order.update({
       where: { id: orderId },
       data: { status },
     });
+
     revalidatePath('/manager');
+
+    try {
+      if (updatedOrder.userId) {
+        const channelName = `server-to-user-${updatedOrder.userId}`;
+        const eventName = 'order-status-updated';
+
+        await pusherServer.trigger(channelName, eventName, {
+          orderId: updatedOrder.id,
+          status: updatedOrder.status,
+        });
+      }
+    } catch (pusherErr) {
+      console.error('Pusher trigger failed [updateOrderStatus]', pusherErr);
+    }
   } catch (error) {
     console.error('Error [UPDATE_ORDER_STATUS]', error);
     throw Error('Не вдалося оновити статус.');
@@ -381,7 +392,7 @@ export async function deleteConversation(conversationId: number) {
     await prisma.message.deleteMany({
       where: { conversationId: conversationId },
     });
-    
+
     // Потім видаляємо саму розмову
     await prisma.conversation.delete({
       where: { id: conversationId },
@@ -389,7 +400,7 @@ export async function deleteConversation(conversationId: number) {
 
     const channelName = `chat-${conversationId}`;
     const eventName = "conversation-deleted";
-    
+
     await pusherServer.trigger(channelName, eventName, {
       message: "Цей чат було видалено менеджером.",
     });
@@ -403,7 +414,6 @@ export async function deleteConversation(conversationId: number) {
 }
 
 
-// Позначає розмову як переглянуту менеджером
 export async function markConversationAsViewed(conversationId: number) {
   const session = await getUserSession();
   if (session?.role !== 'MANAGER' && session?.role !== 'ADMIN') {
@@ -418,7 +428,7 @@ export async function markConversationAsViewed(conversationId: number) {
 
     revalidatePath('/manager/chat');
   } catch (error) {
-    // Не кидаємо помилку, щоб не зламати рендеринг сторінки
+
     console.error("Failed to mark conversation as viewed:", error);
   }
 }

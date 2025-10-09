@@ -9,6 +9,8 @@ import { useDebouncedCallback } from "use-debounce";
 const statusFilters: { label: string; value?: OrderStatus }[] = [
   { label: "Всі" },
   { label: "В обробці", value: "PENDING" },
+  { label: "Готується", value: "PREPARING" as OrderStatus },
+  { label: "В дорозі", value: "ON_THE_WAY" as OrderStatus },
   { label: "Виконані", value: "SUCCEEDED" },
   { label: "Скасовані", value: "CANCELLED" },
 ];

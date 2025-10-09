@@ -13,6 +13,8 @@ interface Props {
 
 const statusColors = {
   PENDING: "bg-yellow-100 text-yellow-800",
+  PREPARING: "bg-orange-100 text-orange-800",
+  ON_THE_WAY: "bg-blue-100 text-blue-800",
   SUCCEEDED: "bg-green-100 text-green-800",
   CANCELLED: "bg-red-100 text-red-800",
 };
@@ -48,6 +50,8 @@ export const OrderStatusChanger = ({ orderId, currentStatus }: Props) => {
       )}
     >
       <option value={OrderStatus.PENDING}>В очікуванні</option>
+      <option value={"PREPARING" as OrderStatus}>Готується</option>
+      <option value={"ON_THE_WAY" as OrderStatus}>В дорозі</option>
       <option value={OrderStatus.SUCCEEDED}>Виконано</option>
       <option value={OrderStatus.CANCELLED}>Скасовано</option>
     </select>

@@ -18,9 +18,9 @@ export async function GET() {
         id: Number(user.user.id),
       },
       select: {
+        id: true,
         fullName: true,
         email: true,
-        password: false,
       },
     });
 

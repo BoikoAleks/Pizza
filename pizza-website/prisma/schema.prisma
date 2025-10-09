@@ -157,6 +157,8 @@ model Message {
 
 enum OrderStatus {
   PENDING
+  PREPARING
+  ON_THE_WAY
   SUCCEEDED
   CANCELLED
 }
