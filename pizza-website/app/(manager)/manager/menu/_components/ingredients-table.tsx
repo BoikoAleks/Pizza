@@ -1,33 +1,29 @@
 "use client";
 
 import { useTransition } from "react";
-import { Product, Category } from "@prisma/client";
+import { Ingredient } from "@prisma/client";
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/shared/components/ui";
 import { Pencil, Plus, Trash2 } from "lucide-react";
 import toast from "react-hot-toast";
-import { deleteProduct } from "@/app/actions";
-
-type ProductWithRelations = Product & {
-  category: Category;
-};
+import { deleteIngredient } from "@/app/actions";
 
 interface Props {
-  products: ProductWithRelations[];
+  ingredients: Ingredient[];
 }
 
-export const ProductsTable = ({ products }: Props) => {
+export const IngredientsTable = ({ ingredients }: Props) => {
   const [isPending, startTransition] = useTransition();
 
-  const handleDeleteClick = (productId: number, productName: string) => {
-    if (confirm(`Ви впевнені, що хочете видалити "${productName}"?`)) {
+  const handleDeleteClick = (ingredientId: number, ingredientName: string) => {
+    if (confirm(`Ви впевнені, що хочете видалити "${ingredientName}"?`)) {
       startTransition(async () => {
         try {
-          await deleteProduct(productId);
-          toast.success(`Продукт "${productName}" успішно видалено!`);
+          await deleteIngredient(ingredientId);
+          toast.success(`Інгредієнт "${ingredientName}" успішно видалено!`);
         } catch (error) {
-          toast.error("Не вдалося видалити продукт.");
+          toast.error("Не вдалося видалити інгредієнт.");
         }
       });
     }
@@ -36,11 +32,11 @@ export const ProductsTable = ({ products }: Props) => {
   return (
     <div className="bg-white rounded-lg border">
       <div className="p-4 flex justify-between items-center border-b">
-        <h2 className="text-xl font-bold">Продукти</h2>
+        <h2 className="text-xl font-bold">Інгредієнти</h2>
         <Button asChild>
-          <Link href="/manager/menu?addProduct=true">
+          <Link href="/manager/menu?tab=ingredients&addIngredient=true">
             <Plus size={18} className="mr-2" />
-            Додати продукт
+            Додати інгредієнт
           </Link>
         </Button>
       </div>
@@ -56,7 +52,7 @@ export const ProductsTable = ({ products }: Props) => {
                 Назва
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                Категорія
+                Ціна
               </th>
               <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">
                 Дії
@@ -64,34 +60,24 @@ export const ProductsTable = ({ products }: Props) => {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {products.length === 0 && (
-              <tr>
-                <td
-                  colSpan={4}
-                  className="px-6 py-12 text-center text-gray-500"
-                >
-                  Жодного продукту ще не створено.
-                </td>
-              </tr>
-            )}
-            {products.map((product) => (
-              <tr key={product.id}>
-                <td className="px-6 py-4 whitespace-nowrap">
+            {ingredients.map((ingredient) => (
+              <tr key={ingredient.id}>
+                <td className="px-6 py-4">
                   <Image
-                    src={product.imageUrl}
-                    alt={product.name}
-                    width={50}
-                    height={50}
-                    className="rounded-md object-cover"
+                    src={ingredient.imageUrl}
+                    alt={ingredient.name}
+                    width={40}
+                    height={40}
+                    className="rounded-full object-cover"
                   />
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                  {product.name}
+                  {ingredient.name}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {product.category.name}
+                  {ingredient.price} грн
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
                   <div className="flex items-center justify-end gap-3">
                     <Button
                       asChild
@@ -99,13 +85,15 @@ export const ProductsTable = ({ products }: Props) => {
                       size="icon"
                       disabled={isPending}
                     >
-                      <Link href={`/manager/menu?editProduct=${product.id}`}>
+                      <Link
+                        href={`/manager/menu?tab=ingredients&editIngredient=${ingredient.id}`}
+                      >
                         <Pencil size={16} />
                       </Link>
                     </Button>
                     <Button
                       onClick={() =>
-                        handleDeleteClick(product.id, product.name)
+                        handleDeleteClick(ingredient.id, ingredient.name)
                       }
                       variant="destructive"
                       size="icon"

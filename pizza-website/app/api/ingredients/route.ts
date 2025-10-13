@@ -13,3 +13,16 @@ export async function GET() {
     );
   }
 }
+
+export async function POST(req: Request) {
+  try {
+    const body = await req.json();
+    const { name, price, imageUrl } = body;
+    const ingredient = await prisma.ingredient.create({ data: { name, price: Number(price) || 0, imageUrl: imageUrl ?? "" } });
+    return NextResponse.json(ingredient, { status: 201 });
+  } catch (error) {
+    console.error(error);
+    return NextResponse.json({ error: "Failed to create ingredient" }, { status: 500 });
+  }
+}
+

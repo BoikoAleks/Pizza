@@ -1,8 +1,11 @@
-export default function PaymentSuccess({
-  searchParams: { amount },
+export default async function PaymentSuccess({
+  searchParams,
 }: {
-  searchParams: { amount: string };
+  searchParams: { amount: string } | Promise<{ amount: string }>;
 }) {
+  const params = await searchParams;
+  const amount = params?.amount ?? '0';
+
   return (
     <main className="max-w-6xl mx-auto p-10 text-white text-center border m-10 rounded-md bg-gradient-to-tr from-blue-500 to-purple-500">
       <div className="mb-10">

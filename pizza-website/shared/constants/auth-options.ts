@@ -1,5 +1,3 @@
-// ФАЙЛ: /shared/constants/auth-options.ts (ЗАМІНІТЬ ПОВНІСТЮ)
-
 import { prisma } from '@/prisma/prisma-client';
 import { compare, hashSync } from 'bcrypt';
 import { AuthOptions } from 'next-auth';
@@ -72,7 +70,7 @@ export const authOptions: AuthOptions = {
                 if (!user?.email) {
                     return false;
                 }
-                
+
                 const findUser = await prisma.user.findFirst({
                     where: {
                         OR: [
@@ -110,7 +108,7 @@ export const authOptions: AuthOptions = {
         // ===================================================================
         // =================== ОСНОВНЕ ВИПРАВЛЕННЯ ТУТ ===================
         // ===================================================================
-        async jwt({ token}) {
+        async jwt({ token }) {
             // Цей callback тепер буде надійною точкою для збагачення токена
             // даними з НАШОЇ бази даних.
 
@@ -131,7 +129,7 @@ export const authOptions: AuthOptions = {
                     name: dbUser.fullName,   // <-- Кладемо ім'я з Prisma
                 };
             }
-            
+
             // Якщо користувача не знайдено, повертаємо оригінальний токен
             return token;
         },

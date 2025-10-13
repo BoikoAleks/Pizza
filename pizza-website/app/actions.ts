@@ -14,6 +14,7 @@ import { z } from 'zod';
 import { revalidatePath } from 'next/cache';
 import { changePasswordSchema, personalDataSchema } from '@/shared/components/shared/modals/auth-modal/forms/schemas';
 import { pusherServer } from '@/shared/lib/pusher';
+import { categoryFormSchema, CategoryFormValues, ingredientFormSchema, IngredientFormValues, productFormSchema, ProductFormValues } from '@/shared/lib/schemas';
 
 
 export async function createOrder(data: CheckoutFormValues) {
@@ -25,7 +26,7 @@ export async function createOrder(data: CheckoutFormValues) {
       throw new Error('Cart token not found');
     }
 
-    //  ОТРИМУЄМО СЕСІЮ ПОТОЧНОГО КОРИСТУВАЧА
+
     const session = await getUserSession();
 
     // Знаходимо корзину по токену
@@ -58,15 +59,15 @@ export async function createOrder(data: CheckoutFormValues) {
       throw new Error('Cart is empty');
     }
 
-    // Determine delivery fee and compute final total
+
     const DELIVERY_FEE = 100;
     const isDelivery = data.deliveryMethod === 'delivery';
     const finalTotal = userCart.totalAmount + (isDelivery ? DELIVERY_FEE : 0);
 
-    // Prepare delivery timestamp: if deliveryTime is provided as HH:MM, convert to ISO for today or next day if time passed
+
     let deliveryTimestamp: string | undefined = undefined;
     if (data.deliveryTime) {
-      // data.deliveryTime is either 'HH:MM' or empty
+
       const parts = data.deliveryTime.split(':');
       if (parts.length === 2) {
         const now = new Date();
@@ -74,18 +75,18 @@ export async function createOrder(data: CheckoutFormValues) {
         target.setHours(Number(parts[0]));
         target.setMinutes(Number(parts[1]));
         target.setSeconds(0);
-        // if target earlier than now, assume next day
+
         if (target.getTime() <= now.getTime()) {
           target.setDate(target.getDate() + 1);
         }
         deliveryTimestamp = target.toISOString();
       } else {
-        // fallback: store raw string
+
         deliveryTimestamp = data.deliveryTime;
       }
     }
 
-    // Build a full address string including house number and apartment if provided
+
     const addressParts: string[] = [];
     if (data.address) addressParts.push(String(data.address).trim());
     if (data.houseNumber) addressParts.push(String(data.houseNumber).trim());
@@ -106,12 +107,12 @@ export async function createOrder(data: CheckoutFormValues) {
         items: JSON.stringify(userCart.items),
         deliveryTime: deliveryTimestamp ?? undefined,
 
-        // ДОДАЄМО ID КОРИСТУВАЧА, ЯКЩО ВІН АВТОРИЗОВАНИЙ
+
         userId: session?.id ? Number(session.id) : undefined,
       },
     });
 
-    // Очищуємо корзину
+
     await prisma.cart.update({
       where: {
         id: userCart.id,
@@ -192,7 +193,7 @@ export async function createCheckoutSession(formData: FormData) {
     throw new Error('Order ID is required');
   }
 
-  // 1. Отримуємо замовлення з нашої бази даних
+
   const order = await prisma.order.findUnique({
     where: { id: orderId },
   });
@@ -201,7 +202,6 @@ export async function createCheckoutSession(formData: FormData) {
     throw new Error('Order not found');
   }
 
-  // 2. Створюємо платіжну сесію в Stripe
   const checkoutSession = await stripe.checkout.sessions.create({
     payment_method_types: ['card'],
     line_items: [
@@ -219,10 +219,10 @@ export async function createCheckoutSession(formData: FormData) {
       },
     ],
     mode: 'payment',
-    // 3. Вказуємо URL, куди повернути користувача
+
     success_url: `${process.env.NEXT_PUBLIC_APP_URL}/payment/success?orderId=${order.id}`,
     cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/payment/cancel`,
-    // 4. Зберігаємо наш ID замовлення, щоб знайти його при webhook
+
     metadata: {
       orderId: order.id,
     },
@@ -326,7 +326,7 @@ export async function updatePersonalData(
       where: { id: Number(session.id) },
       data: {
         fullName: values.fullName,
-        // Рядок з 'phone' видалено
+
       },
     });
     revalidatePath("/profile");
@@ -415,19 +415,18 @@ export async function getChatMessages() {
 
 
 export async function deleteConversation(conversationId: number) {
-  // Перевірка прав доступу
   const session = await getUserSession();
   if (session?.role !== 'MANAGER' && session?.role !== 'ADMIN') {
     throw new Error('Forbidden: Insufficient permissions');
   }
 
   try {
-    // Спочатку видаляємо всі повідомлення, пов'язані з цією розмовою
+
     await prisma.message.deleteMany({
       where: { conversationId: conversationId },
     });
 
-    // Потім видаляємо саму розмову
+
     await prisma.conversation.delete({
       where: { id: conversationId },
     });
@@ -438,8 +437,6 @@ export async function deleteConversation(conversationId: number) {
     await pusherServer.trigger(channelName, eventName, {
       message: "Цей чат було видалено менеджером.",
     });
-
-    // Оновлюємо кеш сторінки чатів, щоб список оновився
     revalidatePath('/manager/chat');
   } catch (error) {
     console.error("Error [DELETE_CONSERVATION]", error);
@@ -464,5 +461,164 @@ export async function markConversationAsViewed(conversationId: number) {
   } catch (error) {
 
     console.error("Failed to mark conversation as viewed:", error);
+  }
+}
+
+export async function deleteProduct(productId: number) {
+  const session = await getUserSession();
+  if (session?.role !== 'MANAGER' && session?.role !== 'ADMIN') {
+    throw new Error('Недостатньо прав');
+  }
+  try {
+    await prisma.product.update({
+      where: { id: productId },
+      data: {
+        ingredients: {
+          set: [],
+        },
+      },
+    });
+
+    await prisma.productItem.deleteMany({
+      where: { productId: productId },
+    });
+
+    await prisma.product.delete({
+      where: { id: productId },
+    });
+
+    revalidatePath('/manager/menu');
+  } catch (error) {
+    console.error("Error [DELETE_PRODUCT]", error);
+    throw new Error('Не вдалося видалити продукт.');
+  }
+}
+
+export async function upsertIngredient(data: IngredientFormValues) {
+  await checkManagerRole();
+
+  const validatedData = ingredientFormSchema.parse(data);
+  const { id, ...ingredientData } = validatedData;
+
+  if (id) {
+    // Оновлення існуючого інгредієнта
+    await prisma.ingredient.update({
+      where: { id },
+      data: ingredientData,
+    });
+  } else {
+    // Створення нового інгредієнта
+    await prisma.ingredient.create({
+      data: ingredientData,
+    });
+  }
+
+  revalidatePath('/manager/menu');
+}
+
+export async function upsertProduct(data: z.infer<typeof productFormSchema>) {
+  await checkManagerRole();
+
+  const validated = productFormSchema.parse(data);
+
+  const { id, items, ingredientIds, ...rest } = validated as any;
+
+  if (!id) {
+    // create
+    await prisma.product.create({
+      data: {
+        name: rest.name,
+        imageUrl: rest.imageUrl,
+        categoryId: rest.categoryId,
+        items: { create: items.map((it: any) => ({ price: it.price, size: it.size ?? undefined, pizzaType: it.pizzaType ?? undefined })) },
+        ingredients: ingredientIds ? { connect: ingredientIds.map((i: number) => ({ id: i })) } : undefined,
+      },
+    });
+  } else {
+    // update: replace items in a transaction
+    await prisma.$transaction(async tx => {
+      await tx.product.update({ where: { id }, data: { ingredients: { set: ingredientIds ? ingredientIds.map((i: number) => ({ id: i })) : [] } } });
+      await tx.productItem.deleteMany({ where: { productId: id } });
+      await tx.product.update({
+        where: { id },
+        data: {
+          name: rest.name,
+          imageUrl: rest.imageUrl,
+          categoryId: rest.categoryId,
+          items: { create: items.map((it: any) => ({ price: it.price, size: it.size ?? undefined, pizzaType: it.pizzaType ?? undefined })) },
+        },
+      });
+    });
+  }
+
+  revalidatePath('/manager/menu');
+}
+
+export async function deleteIngredient(ingredientId: number) {
+  await checkManagerRole();
+
+  try {
+    await prisma.ingredient.update({
+      where: { id: ingredientId },
+      data: {
+        products: {
+          set: [],
+        },
+      },
+    });
+
+    await prisma.ingredient.delete({
+      where: { id: ingredientId },
+    });
+
+    revalidatePath('/manager/menu');
+  } catch (error) {
+    console.error("Error [DELETE_INGREDIENT]", error);
+    throw new Error('Не вдалося видалити інгредієнт.');
+  }
+}
+
+export async function upsertCategory(data: CategoryFormValues) {
+  await checkManagerRole();
+
+  const validatedData = categoryFormSchema.parse(data);
+  const { id, ...categoryData } = validatedData;
+
+  if (id) {
+    // Оновлення існуючої категорії
+    await prisma.category.update({
+      where: { id },
+      data: categoryData,
+    });
+  } else {
+    // Створення нової категорії
+    await prisma.category.create({
+      data: categoryData,
+    });
+  }
+
+  revalidatePath('/manager/menu');
+}
+
+export async function deleteCategory(categoryId: number) {
+  await checkManagerRole();
+
+  // Перевіряємо, чи є продукти в цій категорії
+  const productsInCategory = await prisma.product.count({
+    where: { categoryId: categoryId },
+  });
+
+  if (productsInCategory > 0) {
+    throw new Error('Неможливо видалити категорію, оскільки в ній є продукти. Спочатку перемістіть або видаліть їх.');
+  }
+
+  try {
+    await prisma.category.delete({
+      where: { id: categoryId },
+    });
+    revalidatePath('/manager/menu');
+  } catch (error) {
+    console.error("Error [DELETE_CATEGORY]", error);
+    throw new Error('Не вдалося видалити категорію.');
   }
 }

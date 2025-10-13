@@ -34,8 +34,6 @@ export const AuthModal: React.FC<Props> = ({ open, onClose }) => {
 
         <hr />
         <div className="flex gap-2">
-          
-
           <Button
             variant="secondary"
             onClick={() =>

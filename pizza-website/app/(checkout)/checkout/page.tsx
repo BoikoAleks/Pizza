@@ -24,7 +24,11 @@ import { CheckoutTimeSelection } from "@/shared/components/shared/checkout/check
 
 const PICKUP_POINTS = [
   { id: 1, name: "Republic cafe", address: "м. Чернівці, вул. Головна, 125" },
-  { id: 2, name: "Republic", address: "м. Чернівці, вул. Богдана Хмельницького, 56" },
+  {
+    id: 2,
+    name: "Republic",
+    address: "м. Чернівці, вул. Богдана Хмельницького, 56",
+  },
   { id: 3, name: "Republic", address: "м. Чернівці, просп. Незалежності, 222" },
 ];
 
@@ -48,17 +52,17 @@ export default function CheckoutPage() {
       houseNumber: "",
       apartment: "",
       comment: "",
-      deliveryTime: "", 
+      deliveryTime: "",
     },
   });
 
   React.useEffect(() => {
     async function fetchUserInfo() {
       const data = await Api.auth.getMe();
-      const [firstName, lastName] = data.fullName.split(' ');
-      form.setValue('firstName', firstName);
-      form.setValue('lastName', lastName);
-      form.setValue('email', data.email);
+      const [firstName, lastName] = data.fullName.split(" ");
+      form.setValue("firstName", firstName);
+      form.setValue("lastName", lastName);
+      form.setValue("email", data.email);
     }
     if (session) {
       fetchUserInfo();
@@ -125,7 +129,9 @@ export default function CheckoutPage() {
               />
 
               {/* ОНОВЛЕНИЙ БЛОК: Вибір способу доставки */}
-              <div className={`bg-white rounded-xl p-6 shadow-sm ${loading ? "opacity-40 pointer-events-none" : ""}`}>
+              <div
+                className={`bg-white rounded-xl p-6 shadow-sm ${loading ? "opacity-40 pointer-events-none" : ""}`}
+              >
                 <h2 className="text-2xl font-bold mb-6">2. Спосіб доставки</h2>
                 <div className="flex gap-3">
                   <button
@@ -140,12 +146,19 @@ export default function CheckoutPage() {
                   >
                     <div className="flex flex-col items-center">
                       <div className="flex items-center gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-yellow-600" viewBox="0 0 20 20" fill="currentColor">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-5 w-5 text-yellow-600"
+                          viewBox="0 0 20 20"
+                          fill="currentColor"
+                        >
                           <path d="M3 3h10v4H3V3zm0 6h10v8H3V9zm12-1h2l1 3h-3V8z" />
                         </svg>
                         <span className="font-semibold">Доставка</span>
                       </div>
-                      <span className="text-sm text-gray-500">Доставка кур'єром — 100 грн</span>
+                      <span className="text-sm text-gray-500">
+                        Доставка кур'єром — 100 грн
+                      </span>
                     </div>
                   </button>
                   <button
@@ -160,21 +173,30 @@ export default function CheckoutPage() {
                   >
                     <div className="flex flex-col items-center">
                       <div className="flex items-center gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-yellow-600" viewBox="0 0 20 20" fill="currentColor">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-5 w-5 text-yellow-600"
+                          viewBox="0 0 20 20"
+                          fill="currentColor"
+                        >
                           <path d="M5 3a1 1 0 00-1 1v9a3 3 0 003 3h7a3 3 0 003-3V7a1 1 0 00-1-1h-2l-1-2H8L7 3H5z" />
                         </svg>
                         <span className="font-semibold">Самовивіз</span>
                       </div>
-                      <span className="text-sm text-gray-500">Забирайте самі — без вартості доставки</span>
-                      
+                      <span className="text-sm text-gray-500">
+                        Забирайте самі — без вартості доставки
+                      </span>
                     </div>
                   </button>
                 </div>
-                {/* Hidden input so the server receives deliveryMethod */}
-                <input type="hidden" name="deliveryMethod" value={deliveryMethod} />
+
+                <input
+                  type="hidden"
+                  name="deliveryMethod"
+                  value={deliveryMethod}
+                />
               </div>
 
-              {/* Умовний рендеринг форми адреси або точок самовивозу */}
               {deliveryMethod === "delivery" ? (
                 <CheckoutAddressForm
                   className={loading ? "opacity-40 pointer-events-none" : ""}
@@ -186,7 +208,6 @@ export default function CheckoutPage() {
                 />
               )}
 
-              
               <CheckoutTimeSelection
                 className={loading ? "opacity-40 pointer-events-none" : ""}
               />

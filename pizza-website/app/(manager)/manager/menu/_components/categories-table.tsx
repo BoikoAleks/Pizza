@@ -1,33 +1,30 @@
 "use client";
 
 import { useTransition } from "react";
-import { Product, Category } from "@prisma/client";
-import Image from "next/image";
+import { Category } from "@prisma/client";
 import Link from "next/link";
 import { Button } from "@/shared/components/ui";
 import { Pencil, Plus, Trash2 } from "lucide-react";
 import toast from "react-hot-toast";
-import { deleteProduct } from "@/app/actions";
-
-type ProductWithRelations = Product & {
-  category: Category;
-};
+import { deleteCategory } from "@/app/actions";
 
 interface Props {
-  products: ProductWithRelations[];
+  categories: Category[];
 }
 
-export const ProductsTable = ({ products }: Props) => {
+export const CategoriesTable = ({ categories }: Props) => {
   const [isPending, startTransition] = useTransition();
 
-  const handleDeleteClick = (productId: number, productName: string) => {
-    if (confirm(`Ви впевнені, що хочете видалити "${productName}"?`)) {
+  const handleDeleteClick = (categoryId: number, categoryName: string) => {
+    if (
+      confirm(`Ви впевнені, що хочете видалити категорію "${categoryName}"?`)
+    ) {
       startTransition(async () => {
         try {
-          await deleteProduct(productId);
-          toast.success(`Продукт "${productName}" успішно видалено!`);
-        } catch (error) {
-          toast.error("Не вдалося видалити продукт.");
+          await deleteCategory(categoryId);
+          toast.success(`Категорію "${categoryName}" успішно видалено!`);
+        } catch (error: any) {
+          toast.error(error.message || "Не вдалося видалити категорію.");
         }
       });
     }
@@ -36,27 +33,23 @@ export const ProductsTable = ({ products }: Props) => {
   return (
     <div className="bg-white rounded-lg border">
       <div className="p-4 flex justify-between items-center border-b">
-        <h2 className="text-xl font-bold">Продукти</h2>
+        <h2 className="text-xl font-bold">Категорії</h2>
         <Button asChild>
-          <Link href="/manager/menu?addProduct=true">
+          <Link href="/manager/menu?tab=categories&addCategory=true">
             <Plus size={18} className="mr-2" />
-            Додати продукт
+            Додати категорію
           </Link>
         </Button>
       </div>
-
       <div className="overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                Зображення
+                ID
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                 Назва
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                Категорія
               </th>
               <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">
                 Дії
@@ -64,34 +57,15 @@ export const ProductsTable = ({ products }: Props) => {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {products.length === 0 && (
-              <tr>
-                <td
-                  colSpan={4}
-                  className="px-6 py-12 text-center text-gray-500"
-                >
-                  Жодного продукту ще не створено.
-                </td>
-              </tr>
-            )}
-            {products.map((product) => (
-              <tr key={product.id}>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <Image
-                    src={product.imageUrl}
-                    alt={product.name}
-                    width={50}
-                    height={50}
-                    className="rounded-md object-cover"
-                  />
+            {categories.map((category) => (
+              <tr key={category.id}>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  #{category.id}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                  {product.name}
+                  {category.name}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {product.category.name}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
                   <div className="flex items-center justify-end gap-3">
                     <Button
                       asChild
@@ -99,13 +73,15 @@ export const ProductsTable = ({ products }: Props) => {
                       size="icon"
                       disabled={isPending}
                     >
-                      <Link href={`/manager/menu?editProduct=${product.id}`}>
+                      <Link
+                        href={`/manager/menu?tab=categories&editCategory=${category.id}`}
+                      >
                         <Pencil size={16} />
                       </Link>
                     </Button>
                     <Button
                       onClick={() =>
-                        handleDeleteClick(product.id, product.name)
+                        handleDeleteClick(category.id, category.name)
                       }
                       variant="destructive"
                       size="icon"
