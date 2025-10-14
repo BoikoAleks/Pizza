@@ -26,8 +26,12 @@ export const ProductsTable = ({ products }: Props) => {
         try {
           await deleteProduct(productId);
           toast.success(`Продукт "${productName}" успішно видалено!`);
-        } catch (error) {
-          toast.error("Не вдалося видалити продукт.");
+        } catch (error: unknown) {
+          if (error instanceof Error) {
+            toast.error(error.message);
+          } else {
+            toast.error("Не вдалося видалити продукт.");
+          }
         }
       });
     }

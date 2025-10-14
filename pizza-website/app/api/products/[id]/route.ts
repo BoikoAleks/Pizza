@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/prisma/prisma-client";
+import { checkManagerRole } from "@/app/actions";
 
 export async function GET(_req: Request, context: { params: { id: string } }) {
   const params = await context.params;
@@ -15,6 +16,7 @@ export async function GET(_req: Request, context: { params: { id: string } }) {
 }
 
 export async function PUT(req: Request, context: { params: { id: string } }) {
+  await checkManagerRole();
   const params = await context.params;
   const id = Number(params.id);
   try {
@@ -22,12 +24,14 @@ export async function PUT(req: Request, context: { params: { id: string } }) {
     const { name, imageUrl, items, ingredients } = body;
 
     // Update product
+    type Item = { id: number; price: number; size?: number; pizzaType?: number };
+
     const updated = await prisma.product.update({
       where: { id },
       data: {
         name,
         imageUrl,
-        items: items ? { updateMany: items.map((it: any) => ({ where: { id: it.id }, data: { price: Number(it.price) || 0, size: it.size ?? null, pizzaType: it.pizzaType ?? null } })) } : undefined,
+        items: items ? { updateMany: items.map((it: Item) => ({ where: { id: it.id }, data: { price: Number(it.price) || 0, size: it.size ?? null, pizzaType: it.pizzaType ?? null } })) } : undefined,
         ...(ingredients ? { ingredients: { set: ingredients.map((i: number) => ({ id: i })) } } : {}),
       },
       include: { items: true, ingredients: true },
@@ -41,6 +45,7 @@ export async function PUT(req: Request, context: { params: { id: string } }) {
 }
 
 export async function DELETE(_req: Request, { params }: { params: { id: string } }) {
+  await checkManagerRole();
   const id = Number(params.id);
   try {
     // Ensure related records are removed first to avoid foreign key constraint errors

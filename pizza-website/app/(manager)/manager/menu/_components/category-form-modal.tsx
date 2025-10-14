@@ -60,8 +60,12 @@ export const CategoryFormModal = ({ isOpen, categoryToEdit }: Props) => {
           `Категорію успішно ${categoryToEdit ? "оновлено" : "створено"}!`
         );
         handleClose();
-      } catch (error) {
-        toast.error("Сталася помилка.");
+      } catch (error: unknown) {
+        if (error instanceof Error) {
+          toast.error(error.message);
+        } else {
+          toast.error("Сталася помилка.");
+        }
       }
     });
   };

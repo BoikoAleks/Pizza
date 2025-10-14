@@ -22,8 +22,12 @@ export const IngredientsTable = ({ ingredients }: Props) => {
         try {
           await deleteIngredient(ingredientId);
           toast.success(`Інгредієнт "${ingredientName}" успішно видалено!`);
-        } catch (error) {
-          toast.error("Не вдалося видалити інгредієнт.");
+        } catch (error: unknown) {
+          if (error instanceof Error) {
+            toast.error(error.message);
+          } else {
+            toast.error("Не вдалося видалити інгредієнт.");
+          }
         }
       });
     }

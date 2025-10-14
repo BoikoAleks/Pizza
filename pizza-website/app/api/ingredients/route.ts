@@ -1,5 +1,6 @@
 import { prisma } from "@/prisma/prisma-client";
 import { NextResponse } from "next/server";
+import { checkManagerRole } from "@/app/actions";
 
 export async function GET() {
   try {
@@ -15,6 +16,7 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
+  await checkManagerRole();
   try {
     const body = await req.json();
     const { name, price, imageUrl } = body;

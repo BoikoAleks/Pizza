@@ -5,6 +5,7 @@ import GitHubProvider from 'next-auth/providers/github';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import GoogleProvider from 'next-auth/providers/google';
 import { UserRole } from '@prisma/client';
+import { cookies } from 'next/headers';
 
 export const authOptions: AuthOptions = {
     providers: [
@@ -63,6 +64,12 @@ export const authOptions: AuthOptions = {
     callbacks: {
         async signIn({ user, account }) {
             try {
+                // Clear anonymous cart on sign in
+                const cookieStore = cookies();
+                if ((await cookieStore).get('cartToken')) {
+                    (await cookieStore).delete('cartToken');
+                }
+
                 if (account?.provider === 'credentials') {
                     return true;
                 }

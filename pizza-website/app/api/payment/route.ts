@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+import Stripe from "stripe";
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
 export async function POST(request: NextRequest) {
     try {
@@ -11,7 +13,10 @@ export async function POST(request: NextRequest) {
         });
         return NextResponse.json({ clientSecret: paymentIntent.client_secret });
 
-    } catch (error) {
+    } catch (error: unknown) {
+        if (error instanceof Error) {
+            return new Response(error.message, { status: 400 });
+        }
         return new Response("Invalid request body", { status: 400 });
     }
 }

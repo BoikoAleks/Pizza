@@ -23,8 +23,12 @@ export const CategoriesTable = ({ categories }: Props) => {
         try {
           await deleteCategory(categoryId);
           toast.success(`Категорію "${categoryName}" успішно видалено!`);
-        } catch (error: any) {
-          toast.error(error.message || "Не вдалося видалити категорію.");
+        } catch (error: unknown) {
+          if (error instanceof Error) {
+            toast.error(error.message || "Не вдалося видалити категорію.");
+          } else {
+            toast.error("Не вдалося видалити категорію.");
+          }
         }
       });
     }

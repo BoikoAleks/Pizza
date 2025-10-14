@@ -15,6 +15,8 @@ import { revalidatePath } from 'next/cache';
 import { changePasswordSchema, personalDataSchema } from '@/shared/components/shared/modals/auth-modal/forms/schemas';
 import { pusherServer } from '@/shared/lib/pusher';
 import { categoryFormSchema, CategoryFormValues, ingredientFormSchema, IngredientFormValues, productFormSchema, ProductFormValues } from '@/shared/lib/schemas';
+import { writeFile, mkdir } from 'fs/promises';
+import path from 'path';
 
 
 export async function createOrder(data: CheckoutFormValues) {
@@ -25,7 +27,6 @@ export async function createOrder(data: CheckoutFormValues) {
     if (!cartToken) {
       throw new Error('Cart token not found');
     }
-
 
     const session = await getUserSession();
 
@@ -142,8 +143,7 @@ export async function createOrder(data: CheckoutFormValues) {
 
 
     try {
-      const StripeLib = require('stripe');
-      const stripeLocal = new StripeLib(process.env.STRIPE_SECRET_KEY!);
+      const stripeLocal = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
       const checkoutSession = await stripeLocal.checkout.sessions.create({
         payment_method_types: ['card'],
@@ -192,7 +192,6 @@ export async function createCheckoutSession(formData: FormData) {
   if (!orderId) {
     throw new Error('Order ID is required');
   }
-
 
   const order = await prisma.order.findUnique({
     where: { id: orderId },
@@ -392,7 +391,7 @@ export async function updateOrderStatus(orderId: number, status: OrderStatus) {
 export async function checkManagerRole() {
   const session = await getUserSession();
   if (session?.role !== 'MANAGER' && session?.role !== 'ADMIN') {
-    throw new Error('Forbidden: Insufficient permissions');
+    throw new Error('Forbidden: NOT ENOUGH permissions');
   }
 }
 
@@ -415,9 +414,10 @@ export async function getChatMessages() {
 
 
 export async function deleteConversation(conversationId: number) {
+  await checkManagerRole();
   const session = await getUserSession();
   if (session?.role !== 'MANAGER' && session?.role !== 'ADMIN') {
-    throw new Error('Forbidden: Insufficient permissions');
+    throw new Error('Forbidden: NOT ENOUGHq permissions');
   }
 
   try {
@@ -501,13 +501,11 @@ export async function upsertIngredient(data: IngredientFormValues) {
   const { id, ...ingredientData } = validatedData;
 
   if (id) {
-    // Оновлення існуючого інгредієнта
     await prisma.ingredient.update({
       where: { id },
       data: ingredientData,
     });
   } else {
-    // Створення нового інгредієнта
     await prisma.ingredient.create({
       data: ingredientData,
     });
@@ -516,42 +514,86 @@ export async function upsertIngredient(data: IngredientFormValues) {
   revalidatePath('/manager/menu');
 }
 
-export async function upsertProduct(data: z.infer<typeof productFormSchema>) {
+export async function upsertProduct(data: ProductFormValues) {
   await checkManagerRole();
 
-  const validated = productFormSchema.parse(data);
+  const validatedData = productFormSchema.parse(data);
+  const { id, imageUrl, items, ingredientIds, ...productData } = validatedData;
 
-  const { id, items, ingredientIds, ...rest } = validated as any;
+  let finalImageUrl = imageUrl;
 
-  if (!id) {
-    // create
-    await prisma.product.create({
-      data: {
-        name: rest.name,
-        imageUrl: rest.imageUrl,
-        categoryId: rest.categoryId,
-        items: { create: items.map((it: any) => ({ price: it.price, size: it.size ?? undefined, pizzaType: it.pizzaType ?? undefined })) },
-        ingredients: ingredientIds ? { connect: ingredientIds.map((i: number) => ({ id: i })) } : undefined,
-      },
-    });
-  } else {
-    // update: replace items in a transaction
-    await prisma.$transaction(async tx => {
-      await tx.product.update({ where: { id }, data: { ingredients: { set: ingredientIds ? ingredientIds.map((i: number) => ({ id: i })) : [] } } });
-      await tx.productItem.deleteMany({ where: { productId: id } });
-      await tx.product.update({
-        where: { id },
-        data: {
-          name: rest.name,
-          imageUrl: rest.imageUrl,
-          categoryId: rest.categoryId,
-          items: { create: items.map((it: any) => ({ price: it.price, size: it.size ?? undefined, pizzaType: it.pizzaType ?? undefined })) },
-        },
+  if (imageUrl?.includes('base64')) {
+    const base64Data = imageUrl.split(';base64,').pop();
+    if (base64Data) {
+      const buffer = Buffer.from(base64Data, 'base64');
+      const category = await prisma.category.findUnique({
+        where: { id: validatedData.categoryId },
       });
-    });
+      const categoryName = category?.name.toLowerCase() || 'pizza';
+      const imageName = `${Date.now()}-${Math.round(Math.random() * 1e9)}.webp`;
+      const imagePath = path.join(process.cwd(), 'public', 'images', categoryName, imageName);
+
+      const dir = path.dirname(imagePath);
+      try {
+        await mkdir(dir, { recursive: true });
+      } catch (e: unknown) {
+        if (e instanceof Error && (e as NodeJS.ErrnoException).code !== 'EEXIST') {
+          throw e;
+        }
+      }
+
+      await writeFile(imagePath, buffer);
+      finalImageUrl = `/images/${categoryName}/${imageName}`;
+    }
   }
 
-  revalidatePath('/manager/menu');
+  try {
+    if (id) {
+      await prisma.$transaction(async (tx) => {
+        await tx.product.update({
+          where: { id },
+          data: {
+            ...productData,
+            imageUrl: finalImageUrl,
+            ingredients: {
+              set: ingredientIds?.map((id) => ({ id })),
+            },
+          },
+        });
+
+        await tx.productItem.deleteMany({
+          where: { productId: id },
+        });
+
+        if (items) {
+          await tx.productItem.createMany({
+            data: items.map((item) => ({
+              ...item,
+              productId: id,
+            })),
+          });
+        }
+      });
+    } else {
+      // Create product
+      await prisma.product.create({
+        data: {
+          ...productData,
+          imageUrl: finalImageUrl,
+          ingredients: {
+            connect: ingredientIds?.map((id) => ({ id })),
+          },
+          items: {
+            create: items,
+          },
+        },
+      });
+    }
+    revalidatePath('/manager/menu');
+  } catch (error) {
+    console.error('[UPSERT_PRODUCT]', error);
+    throw new Error('Не вдалося зберегти продукт.');
+  }
 }
 
 export async function deleteIngredient(ingredientId: number) {
@@ -585,13 +627,11 @@ export async function upsertCategory(data: CategoryFormValues) {
   const { id, ...categoryData } = validatedData;
 
   if (id) {
-    // Оновлення існуючої категорії
     await prisma.category.update({
       where: { id },
       data: categoryData,
     });
   } else {
-    // Створення нової категорії
     await prisma.category.create({
       data: categoryData,
     });
@@ -609,7 +649,7 @@ export async function deleteCategory(categoryId: number) {
   });
 
   if (productsInCategory > 0) {
-    throw new Error('Неможливо видалити категорію, оскільки в ній є продукти. Спочатку перемістіть або видаліть їх.');
+    throw new Error('Неможливо видалити категорію, оскільки в ній є продукти.');
   }
 
   try {
