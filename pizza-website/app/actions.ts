@@ -498,20 +498,60 @@ export async function upsertIngredient(data: IngredientFormValues) {
   await checkManagerRole();
 
   const validatedData = ingredientFormSchema.parse(data);
-  const { id, ...ingredientData } = validatedData;
+  const { id, imageUrl, ...ingredientData } = validatedData;
+
+  let finalImageUrl = imageUrl;
+
+  if (imageUrl?.includes("base64")) {
+    const base64Data = imageUrl.split(";base64,").pop();
+    if (base64Data) {
+      const buffer = Buffer.from(base64Data, "base64");
+      const imageName = `${Date.now()}-${Math.round(
+        Math.random() * 1e9
+      )}.webp`;
+      const imagePath = path.join(
+        process.cwd(),
+        "public",
+        "images",
+        "ingredients",
+        imageName
+      );
+
+      const dir = path.dirname(imagePath);
+      try {
+        await mkdir(dir, { recursive: true });
+      } catch (e: unknown) {
+        if (
+          e instanceof Error &&
+          (e as NodeJS.ErrnoException).code !== "EEXIST"
+        ) {
+          throw e;
+        }
+      }
+
+      await writeFile(imagePath, buffer);
+      finalImageUrl = `/images/ingredients/${imageName}`;
+    }
+  }
 
   if (id) {
     await prisma.ingredient.update({
       where: { id },
-      data: ingredientData,
+      data: {
+        ...ingredientData,
+        imageUrl: finalImageUrl,
+      },
     });
   } else {
     await prisma.ingredient.create({
-      data: ingredientData,
+      data: {
+        ...ingredientData,
+        imageUrl: finalImageUrl,
+      },
     });
   }
 
-  revalidatePath('/manager/menu');
+  revalidatePath("/manager/menu");
 }
 
 export async function upsertProduct(data: ProductFormValues) {
@@ -529,7 +569,31 @@ export async function upsertProduct(data: ProductFormValues) {
       const category = await prisma.category.findUnique({
         where: { id: validatedData.categoryId },
       });
-      const categoryName = category?.name.toLowerCase() || 'pizza';
+      let categoryName = category?.name.toLowerCase() || 'other';
+
+      if (categoryName.includes('піца')) {
+        categoryName = 'pizza';
+      }
+      if (categoryName.includes('напої')) {
+        categoryName = 'drinks';
+      }
+      if (categoryName.includes('десерти')) {
+        categoryName = 'desserts';
+      }
+      if (categoryName.includes('закуски')) {
+        categoryName = 'drinks';
+      }
+      if (categoryName.includes('салати')) {
+        categoryName = 'drinks';
+      }
+      if (categoryName.includes('сніданки')) {
+        categoryName = 'breakfast';
+      }
+      if (categoryName.includes('кава')) {
+        categoryName = 'coffee';
+      }
+
+
       const imageName = `${Date.now()}-${Math.round(Math.random() * 1e9)}.webp`;
       const imagePath = path.join(process.cwd(), 'public', 'images', categoryName, imageName);
 

@@ -34,6 +34,8 @@ import { Button } from "@/shared/components/ui";
 import { PlusCircle, Trash2 } from "lucide-react";
 import { productFormSchema, ProductFormValues } from "@/shared/lib/schemas";
 import { upsertProduct } from "@/app/actions";
+import { UploadButton } from "@/shared/components/shared/upload-button";
+
 
 type ProductToEdit =
   | (Product & { items: ProductItem[]; ingredients: { id: number }[] })
@@ -144,9 +146,12 @@ export const ProductFormModal = ({
                 control={form.control}
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>URL зображення</FormLabel>
+                    <FormLabel>Зображення</FormLabel>
                     <FormControl>
-                      <Input {...field} />
+                      <UploadButton
+                        onUpload={(url) => field.onChange(url)}
+                        defaultValue={field.value}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -164,7 +169,7 @@ export const ProductFormModal = ({
                     >
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Оберіть категорію" />
+                          <SelectValue className="bg-white" placeholder="Оберіть категорію" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>

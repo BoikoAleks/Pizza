@@ -8,12 +8,15 @@ import { Button } from "@/shared/components/ui";
 import { Pencil, Plus, Trash2 } from "lucide-react";
 import toast from "react-hot-toast";
 import { deleteIngredient } from "@/app/actions";
+import { useSearchParams } from "next/navigation";
+import { cn } from "@/shared/lib/utils";
 
 interface Props {
   ingredients: Ingredient[];
 }
 
 export const IngredientsTable = ({ ingredients }: Props) => {
+  const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
 
   const handleDeleteClick = (ingredientId: number, ingredientName: string) => {
@@ -65,7 +68,13 @@ export const IngredientsTable = ({ ingredients }: Props) => {
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {ingredients.map((ingredient) => (
-              <tr key={ingredient.id}>
+              <tr
+                key={ingredient.id}
+                className={cn(
+                  searchParams.get("editIngredient") === String(ingredient.id) &&
+                    "bg-blue-50"
+                )}
+              >
                 <td className="px-6 py-4">
                   <Image
                     src={ingredient.imageUrl}

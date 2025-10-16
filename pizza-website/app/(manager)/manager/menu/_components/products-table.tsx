@@ -8,6 +8,8 @@ import { Button } from "@/shared/components/ui";
 import { Pencil, Plus, Trash2 } from "lucide-react";
 import toast from "react-hot-toast";
 import { deleteProduct } from "@/app/actions";
+import { useSearchParams } from "next/navigation";
+import { cn } from "@/shared/lib/utils";
 
 type ProductWithRelations = Product & {
   category: Category;
@@ -18,6 +20,7 @@ interface Props {
 }
 
 export const ProductsTable = ({ products }: Props) => {
+  const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
 
   const handleDeleteClick = (productId: number, productName: string) => {
@@ -79,7 +82,13 @@ export const ProductsTable = ({ products }: Props) => {
               </tr>
             )}
             {products.map((product) => (
-              <tr key={product.id}>
+              <tr
+                key={product.id}
+                className={cn(
+                  searchParams.get("editProduct") === String(product.id) &&
+                    "bg-blue-50"
+                )}
+              >
                 <td className="px-6 py-4 whitespace-nowrap">
                   <Image
                     src={product.imageUrl}

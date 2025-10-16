@@ -29,6 +29,7 @@ import {
   ingredientFormSchema,
   IngredientFormValues,
 } from "@/shared/lib/schemas";
+import { UploadButton } from "@/shared/components/shared/upload-button";
 
 interface Props {
   isOpen: boolean;
@@ -118,9 +119,12 @@ export const IngredientFormModal = ({ isOpen, ingredientToEdit }: Props) => {
               control={form.control}
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>URL зображення</FormLabel>
+                  <FormLabel>Зображення</FormLabel>
                   <FormControl>
-                    <Input {...field} />
+                    <UploadButton
+                      onUpload={(url) => field.onChange(url)}
+                      defaultValue={field.value}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

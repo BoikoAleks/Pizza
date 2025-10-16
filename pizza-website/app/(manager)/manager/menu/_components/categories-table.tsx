@@ -7,12 +7,15 @@ import { Button } from "@/shared/components/ui";
 import { Pencil, Plus, Trash2 } from "lucide-react";
 import toast from "react-hot-toast";
 import { deleteCategory } from "@/app/actions";
+import { useSearchParams } from "next/navigation";
+import { cn } from "@/shared/lib/utils";
 
 interface Props {
   categories: Category[];
 }
 
 export const CategoriesTable = ({ categories }: Props) => {
+  const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
 
   const handleDeleteClick = (categoryId: number, categoryName: string) => {
@@ -62,7 +65,13 @@ export const CategoriesTable = ({ categories }: Props) => {
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {categories.map((category) => (
-              <tr key={category.id}>
+              <tr
+                key={category.id}
+                className={cn(
+                  searchParams.get("editCategory") === String(category.id) &&
+                    "bg-blue-50"
+                )}
+              >
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   #{category.id}
                 </td>

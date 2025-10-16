@@ -6,9 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Category } from "@prisma/client";
 import toast from "react-hot-toast";
-
 import { upsertCategory } from "@/app/actions";
-
 import {
   Dialog,
   DialogContent,
