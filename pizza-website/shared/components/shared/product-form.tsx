@@ -58,7 +58,10 @@ export const ProductForm: React.FC<Props> = ({
     <ChooseProductForm
       imageUrl={product.imageUrl}
       name={product.name}
-      onSubmit={onSubmit}
+      ingredients={product.ingredients}
+      onSubmit={() =>
+        onSubmit(firstItem?.id, product.ingredients?.map((i) => i.id))
+      }
       price={firstItem?.price}
       loading={loading}
     />

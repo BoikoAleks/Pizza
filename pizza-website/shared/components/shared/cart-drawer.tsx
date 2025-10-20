@@ -122,7 +122,7 @@ export const CartDrawer: React.FC<React.PropsWithChildren> = ({ children }) => {
                       type="submit"
                       className="w-full h-12 text-base"
                     >
-                      Оформити заказ
+                      Оформити замовлення
                       <ArrowRight className="w-5 ml-2" />
                     </Button>
                   </Link>

@@ -21,7 +21,7 @@ export default async function Home({
     <>
       <PaymentSuccessToast />
       <Container className="mt-10">
-        <Title text="Всі піци" size="lg" className="font-extrabold" />
+        <Title text="Меню " size="lg" className="font-extrabold" />
       </Container>
 
       <TopBar
