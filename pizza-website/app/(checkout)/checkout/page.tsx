@@ -157,7 +157,7 @@ export default function CheckoutPage() {
                         <span className="font-semibold">Доставка</span>
                       </div>
                       <span className="text-sm text-gray-500">
-                        Доставка кур'єром — 100 грн
+                        Доставка кур&apos;єром — 100 грн
                       </span>
                     </div>
                   </button>

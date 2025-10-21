@@ -60,10 +60,7 @@ export const ProductForm: React.FC<Props> = ({
       name={product.name}
       ingredients={product.ingredients}
       onSubmit={() =>
-        onSubmit(
-          firstItem?.id,
-          product.ingredients?.map((i) => i.id)
-        )
+        onSubmit(firstItem?.id, product.ingredients?.map((i) => i.id))
       }
       price={firstItem?.price}
       loading={loading}

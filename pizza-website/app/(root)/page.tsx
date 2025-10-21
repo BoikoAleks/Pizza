@@ -21,7 +21,11 @@ export default async function Home({
     <>
       <PaymentSuccessToast />
       <Container className="mt-10">
+<<<<<<< HEAD
         <Title text="Меню" size="lg" className="font-extrabold" />
+=======
+        <Title text="Меню " size="lg" className="font-extrabold" />
+>>>>>>> 6fe0ad3bfb1da7fe51dd61c6263fa8b869443d40
       </Container>
 
       <TopBar

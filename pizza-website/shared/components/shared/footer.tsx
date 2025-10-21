@@ -26,17 +26,28 @@ const pickupAddresses = [
 export const Footer = () => {
   return (
     <footer className="bg-gradient-to-r from-indigo-900 via-purple-800 to-fuchsia-800 border-t border-purple-900 shadow-[0_-5px_30px_rgba(120,0,255,0.3)]">
+<<<<<<< HEAD
       <Container className="py-14">
+=======
+      <Container className="py-16">
+>>>>>>> 6fe0ad3bfb1da7fe51dd61c6263fa8b869443d40
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-10 lg:gap-16">
+          {/* Опис */}
           <div className="col-span-2">
             <h2 className="text-3xl font-bold text-fuchsia-200">
               Republic Pizza
             </h2>
             <p className="text-sm text-white/80 mt-4 max-w-sm leading-relaxed">
               Найсмачніша піца у Чернівцях. Швидка доставка та завжди свіжі
+<<<<<<< HEAD
               інгредієнти, приготовані з любов'ю.💜
+=======
+              інгредієнти, приготовані з любов&apos;ю 💜
+>>>>>>> 6fe0ad3bfb1da7fe51dd61c6263fa8b869443d40
             </p>
           </div>
+
+          {/* Навігація */}
           <div>
             <h3 className="text-xl font-semibold mb-4 text-fuchsia-300">
               Навігація
@@ -55,6 +66,7 @@ export const Footer = () => {
             </ul>
           </div>
 
+          {/* Контакти */}
           <div>
             <h3 className="text-xl font-semibold mb-4 text-fuchsia-300">
               Контакти
@@ -76,6 +88,7 @@ export const Footer = () => {
             </ul>
           </div>
 
+          {/* Адреси */}
           <div>
             <h3 className="text-xl font-semibold mb-4 text-fuchsia-300">
               Наші адреси
@@ -89,6 +102,7 @@ export const Footer = () => {
             </ul>
           </div>
 
+          {/* Соцмережі */}
           <div className="col-span-2 md:col-span-4 lg:col-span-1">
             <h3 className="text-xl font-semibold mb-4 text-fuchsia-300">
               Слідкуйте за нами
@@ -110,16 +124,25 @@ export const Footer = () => {
         </div>
       </Container>
 
+<<<<<<< HEAD
+=======
+      {/* Нижня частина */}
+>>>>>>> 6fe0ad3bfb1da7fe51dd61c6263fa8b869443d40
       <div className="py-5 border-t border-white/10 backdrop-blur-sm">
         <Container className="flex flex-col md:flex-row justify-between items-center text-sm text-white/70">
           <p>
             &copy; {new Date().getFullYear()} Republic Pizza. Всі права
             захищено.
           </p>
+
           <div className="flex items-center gap-4 mt-4 md:mt-0">
             <span>Приймаємо до оплати:</span>
             <div className="flex items-center gap-2">
+<<<<<<< HEAD
                <div className="bg-white rounded-lg px-2 py-1 shadow-md">
+=======
+              <div className="bg-white rounded-lg px-2 py-1 shadow-md">
+>>>>>>> 6fe0ad3bfb1da7fe51dd61c6263fa8b869443d40
                 <Image
                   src="/images/assets/Visa.png"
                   alt="Visa"
