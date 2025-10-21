@@ -131,17 +131,6 @@ export async function createOrder(data: CheckoutFormValues) {
 
     const paymentUrl = `${process.env.NEXT_PUBLIC_APP_URL}/payment/${order.id}`;
 
-    await sendEmail(
-      data.email,
-      'Next Pizza / Оплатіть замовлення #' + order.id,
-      await PayOrderTemplate({
-        orderId: order.id,
-        totalAmount: order.totalAmount,
-        paymentUrl,
-      }),
-    );
-
-
     try {
       const stripeLocal = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
@@ -276,10 +265,9 @@ export async function registerUser(body: Prisma.UserCreateInput) {
 
     if (user) {
       if (!user.verified) {
-        throw new Error('Почта не подтверждена');
+        throw new Error('Пошта не підтверджена. Перевірте свою поштову скриньку.');
       }
-
-      throw new Error('Пользователь уже существует');
+      throw new Error('Користувач вже існує.');
     }
 
     const createdUser = await prisma.user.create({
@@ -296,19 +284,50 @@ export async function registerUser(body: Prisma.UserCreateInput) {
       data: {
         code,
         userId: createdUser.id,
+        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
       },
     });
 
     await sendEmail(
       createdUser.email,
-      'Next Pizza / 📝 Підтвердження реєстрації',
+      'Republic Pizza / 📝 Підтвердження реєстрації',
       await VerificationUserTemplate({
         code,
-      }),
+        fullName: createdUser.fullName,
+      } as Parameters<typeof VerificationUserTemplate>[0]),
     );
   } catch (err) {
     console.log('Error [CREATE_USER]', err);
     throw err;
+  }
+}
+
+export async function verifyEmail(code: string) {
+  try {
+    const verificationCode = await prisma.verificationCode.findUnique({
+      where: { code },
+      include: { user: true },
+    });
+
+    if (!verificationCode) {
+      throw new Error("Невірний код підтвердження.");
+    }
+
+    if (new Date() > verificationCode.expiresAt) {
+      throw new Error("Термін дії коду закінчився.");
+    }
+
+    await prisma.user.update({
+      where: { id: verificationCode.userId },
+      data: { verified: new Date() },
+    });
+
+    await prisma.verificationCode.delete({
+      where: { id: verificationCode.id },
+    });
+  } catch (error) {
+    console.error("[VERIFY_EMAIL]", error);
+    throw error;
   }
 }
 
@@ -417,7 +436,7 @@ export async function deleteConversation(conversationId: number) {
   await checkManagerRole();
   const session = await getUserSession();
   if (session?.role !== 'MANAGER' && session?.role !== 'ADMIN') {
-    throw new Error('Forbidden: NOT ENOUGHq permissions');
+    throw new Error('Forbidden: NOT ENOUGH permissions');
   }
 
   try {

@@ -9,12 +9,15 @@ import { FormInput } from "../../../form";
 import { Button } from "@/shared/components/ui";
 import { registerUser } from "@/app/actions";
 
+import { useRouter } from "next/navigation";
+
 interface Props {
   onClose?: VoidFunction;
   onClickLogin?: VoidFunction;
 }
 
 export const RegisterForm: React.FC<Props> = ({ onClose}) => {
+  const router = useRouter();
   const form = useForm<TFormRegisterValues>({
     resolver: zodResolver(formRegisterSchema),
     defaultValues: {
@@ -33,14 +36,20 @@ export const RegisterForm: React.FC<Props> = ({ onClose}) => {
         password: data.password,
       });
 
-      toast.success("Реєстрація успішна 📝. Підтвердьте свою пошту", {
+      toast.success("Реєстрація успішна! Перевірте свою пошту для підтвердження.", {
         icon: "✅",
       });
 
       onClose?.();
+      router.push('/verify');
     } catch (error) {
       console.log("Error [REGISTER_USER]", error);
-      return toast.error("Невірний E-Mail або пароль", {
+      if (error instanceof Error) {
+        return toast.error(error.message, {
+          icon: "❌",
+        });
+      }
+      return toast.error("Сталася помилка.", {
         icon: "❌",
       });
     }

@@ -2,10 +2,10 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
+import { Dialog, DialogContent } from "../ui/dialog";
 import { Input } from "../ui";
 import { Button } from "../ui/button";
-import { Send, User, Headset } from "lucide-react";
+import { Send, User, Headset, MessageSquareHeart } from "lucide-react";
 import Pusher from "pusher-js";
 
 import { cn } from "@/shared/lib/utils";
@@ -19,7 +19,6 @@ interface Props {
   onClose: () => void;
 }
 
-// Створюємо тимчасовий тип для повідомлень, які ще не мають ID з бази
 type TempMessage = Message & { tempId?: string };
 
 export const ChatModal = ({ isOpen, onClose }: Props) => {
@@ -47,7 +46,6 @@ export const ChatModal = ({ isOpen, onClose }: Props) => {
     }
   }, [isOpen]);
 
-  // Підписка на Pusher
   useEffect(() => {
     if (!conversationId) return;
 
@@ -81,8 +79,7 @@ export const ChatModal = ({ isOpen, onClose }: Props) => {
       setMessages([]);
       setConversationId(null);
       onClose();
-
-    }
+    };
 
     channel.bind("new-message", handleNewMessage);
     channel.bind("conversation-deleted", handleConversationDeleted);
@@ -104,18 +101,15 @@ export const ChatModal = ({ isOpen, onClose }: Props) => {
     const tempMessageText = newMessage;
     setNewMessage("");
 
-    // --- ВИПРАВЛЕННЯ 1: Створюємо унікальний тимчасовий ID ---
     const tempId = crypto.randomUUID();
 
-    // Оптимістичне оновлення UI
     setMessages((prev) => [
       ...prev,
       {
-        tempId, // <-- Унікальний ID
+        tempId,
         text: tempMessageText,
         senderRole: session.user.role as UserRole,
-        // Додаємо інші поля, щоб відповідати типу Message
-        id: 0, // тимчасовий
+        id: 0,
         conversationId: conversationId || 0,
         createdAt: new Date(),
       },
@@ -128,58 +122,77 @@ export const ChatModal = ({ isOpen, onClose }: Props) => {
     });
   };
 
+  const WelcomeMessage = () => (
+    <div className="flex flex-col items-center justify-center h-full text-center p-4">
+      <MessageSquareHeart size={60} className="text-primary/60 mb-4" />
+      <h2 className="text-2xl font-bold mb-2">Вас вітає Republic Pizza! 🍕</h2>
+      <p className="text-muted-foreground">
+        Ми готові відповісти на будь-які ваші запитання. Просто напишіть нам!
+      </p>
+    </div>
+  );
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px] h-[70vh] flex flex-col bg-card shadow-lg bg-white">
-        <DialogHeader>
-          <DialogTitle className="">Чат з підтримкою</DialogTitle>
-        </DialogHeader>
-        <div className="flex-1 overflow-y-auto p-4 space-y-4">
-          {messages.map((msg) => {
-            const isUserMessage = msg.senderRole === session?.user.role;
-            return (
-              <div
-                key={msg.id || msg.tempId} // <-- Використовуємо tempId як ключ
-                className={cn(
-                  "flex items-end gap-2",
-                  isUserMessage ? "justify-end" : "justify-start"
-                )}
-              >
-                {!isUserMessage && (
-                  <div className="flex-shrink-0 w-8 h-8 rounded-full bg-muted flex items-center justify-center">
-                    <Headset size={18} className="text-muted-foreground" />
-                  </div>
-                )}
+      <DialogContent className="sm:max-w-[450px] h-[80vh] flex flex-col bg-white shadow-2xl rounded-lg">
+        <div className="p-4 bg-primary text-primary-foreground text-center rounded-t-lg">
+          <h2 className="text-xl font-bold">Чат з менеджером</h2>
+        </div>
+        <div className="flex-1 overflow-y-auto p-4 space-y-5 bg-gray-50">
+          {messages.length === 0 ? (
+            <WelcomeMessage />
+          ) : (
+            messages.map((msg) => {
+              const isUserMessage = msg.senderRole === session?.user.role;
+              return (
                 <div
+                  key={msg.id || msg.tempId}
                   className={cn(
-                    "p-3 rounded-lg max-w-[80%] break-words",
-                    isUserMessage
-                      ? "bg-primary text-primary-foreground rounded-br-none"
-                      : "bg-muted rounded-bl-none"
+                    "flex items-end gap-3",
+                    isUserMessage ? "justify-end" : "justify-start"
                   )}
                 >
-                  <p className="text-sm">{msg.text}</p>
-                </div>
-                {isUserMessage && (
-                  <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary flex items-center justify-center">
-                    <User size={18} className="text-primary-foreground" />
+                  {!isUserMessage && (
+                    <div className="flex-shrink-0 w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                      <Headset size={22} className="text-primary" />
+                    </div>
+                  )}
+                  <div
+                    className={cn(
+                      "p-3 rounded-2xl max-w-[80%] break-words shadow-sm",
+                      isUserMessage
+                        ? "bg-primary text-primary-foreground rounded-br-none"
+                        : "bg-white text-gray-800 rounded-bl-none"
+                    )}
+                  >
+                    <p className="text-sm">{msg.text}</p>
                   </div>
-                )}
-              </div>
-            );
-          })}
+                  {isUserMessage && (
+                    <div className="flex-shrink-0 w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
+                      <User size={22} className="text-gray-600" />
+                    </div>
+                  )}
+                </div>
+              );
+            })
+          )}
           <div ref={messagesEndRef} />
         </div>
         <form
           onSubmit={handleSendMessage}
-          className="flex gap-2 p-4 border-t bg-card"
+          className="flex gap-3 p-4 border-t bg-white rounded-b-lg"
         >
           <Input
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
-            placeholder="Ваше повідомлення..."
+            placeholder="Напишіть повідомлення..."
+            className="flex-1 bg-gray-100 border-none focus:ring-primary"
           />
-          <Button type="submit" size="icon">
+          <Button
+            type="submit"
+            size="icon"
+            className="bg-primary hover:bg-primary/90 rounded-full"
+          >
             <Send size={18} />
           </Button>
         </form>
