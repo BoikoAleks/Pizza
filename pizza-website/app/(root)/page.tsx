@@ -6,6 +6,7 @@ import {
   Title,
   TopBar,
 } from "@/shared/components/shared";
+import type { SearchParams } from "@/shared/components/shared";
 import PaymentSuccessToast from "@/shared/components/shared/payment-success-toast";
 import { findPizzas, GetSearchParams } from "@/shared/lib/find-pizzas";
 import { Suspense } from "react";
@@ -13,7 +14,7 @@ import { Suspense } from "react";
 export default async function Home({
   searchParams,
 }: {
-  searchParams: { [key: string]: string | string[] | undefined };
+  searchParams: Promise<SearchParams>;
 }) {
   const plainSearchParams = await searchParams;
   const categories = await findPizzas(plainSearchParams as GetSearchParams);
@@ -21,11 +22,7 @@ export default async function Home({
     <>
       <PaymentSuccessToast />
       <Container className="mt-10">
-<<<<<<< HEAD
         <Title text="Меню" size="lg" className="font-extrabold" />
-=======
-        <Title text="Меню " size="lg" className="font-extrabold" />
->>>>>>> 6fe0ad3bfb1da7fe51dd61c6263fa8b869443d40
       </Container>
 
       <TopBar

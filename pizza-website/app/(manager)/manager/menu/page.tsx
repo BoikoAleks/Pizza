@@ -10,7 +10,7 @@ import { CategoryFormModal } from "./_components/category-form-modal";
 import { SearchParams } from "@/shared/components/shared";
 
 interface Props {
-  searchParams: SearchParams;
+  searchParams: Promise<SearchParams>;
 }
 
 export default async function ManagerMenuPage({ searchParams }: Props) {

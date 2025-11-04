@@ -1,6 +1,6 @@
 import React from "react";
 import { WhiteBlock } from "../white-block";
-import { FormInput } from "../form";
+import { FormInput, FormPhoneInput } from "../form";
 
 interface Props {
   className?: string;
@@ -13,9 +13,11 @@ export const CheckoutPersonalForm: React.FC<Props> = ({ className }) => {
         <FormInput name="firstName" className="text-base" placeholder="Ім'я" />
         <FormInput name="lastName" className="text-base" placeholder="Прізвище" />
         <FormInput name="email" className="text-base" placeholder="E-Mail" />
-        <FormInput name="phone" className="text-base" placeholder="Phone" />
-        {/* Поле з маскою */}
-        
+        <FormPhoneInput
+          name="phone"
+          className="text-base"
+          placeholder="+380 __ ___ __ __"
+        />
       </div>
     </WhiteBlock>
   );

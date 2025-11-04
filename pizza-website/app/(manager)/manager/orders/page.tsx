@@ -10,7 +10,7 @@ import { OrdersFilters } from "../../_components/orders-filters";
 export const dynamic = "force-dynamic";
 
 interface Props {
-  searchParams: SearchParams;
+  searchParams: Promise<SearchParams>;
 }
 
 const ORDERS_PER_PAGE = 10;
