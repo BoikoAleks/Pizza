@@ -4,6 +4,8 @@ interface Props {
   code: string;
 }
 
+const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+
 export const VerificationUserTemplate: React.FC<Props> = ({ code }) => (
   <div>
     <p>
@@ -11,7 +13,7 @@ export const VerificationUserTemplate: React.FC<Props> = ({ code }) => (
     </p>
 
     <p>
-      <a href={`http://localhost:3000/api/auth/verify?code=${code}`}>
+      <a href={`${appUrl}/api/auth/verify?code=${code}`}>
         Підтвердити реєстрацію
       </a>
     </p>
