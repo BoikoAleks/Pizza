@@ -73,12 +73,12 @@ export default async function ManagerAnalyticsPage() {
 
       <section className="grid gap-6 lg:grid-cols-3">
         <WhiteBlock
-          title="Динаміка доходу"
+          title="Динаміка замовлень"
           className="lg:col-span-2"
           contentClassName="space-y-6"
         >
-          <RevenueTrend data={revenueByDay} />
-          <RevenueTable data={revenueByDay} />
+          <OrdersTrend data={revenueByDay} />
+          <OrdersTable data={revenueByDay} />
         </WhiteBlock>
 
         <WhiteBlock title="Топ продажів" contentClassName="space-y-4">
@@ -109,11 +109,11 @@ function StatsCard({ label, value, description }: StatsCardProps) {
   );
 }
 
-type RevenueTrendProps = {
+type OrdersTrendProps = {
   data: RevenueByDayPoint[];
 };
 
-function RevenueTrend({ data }: RevenueTrendProps) {
+function OrdersTrend({ data }: OrdersTrendProps) {
   const trendMessage = getTrendEmptyState(data);
   if (trendMessage) {
     return <p className="text-sm text-gray-500">{trendMessage}</p>;
@@ -165,11 +165,11 @@ function RevenueTrend({ data }: RevenueTrendProps) {
   );
 }
 
-type RevenueTableProps = {
+type OrdersTableProps = {
   data: RevenueByDayPoint[];
 };
 
-function RevenueTable({ data }: RevenueTableProps) {
+function OrdersTable({ data }: OrdersTableProps) {
   if (data.length === 0) {
     return null;
   }
@@ -183,7 +183,6 @@ function RevenueTable({ data }: RevenueTableProps) {
           <tr>
             <th className="px-4 py-3">Дата</th>
             <th className="px-4 py-3">Замовлень</th>
-            <th className="px-4 py-3">Дохід</th>
           </tr>
         </thead>
         <tbody>
@@ -193,9 +192,6 @@ function RevenueTable({ data }: RevenueTableProps) {
                 {formatFullDate(point.date)}
               </td>
               <td className="px-4 py-3 text-gray-600">{point.orders}</td>
-              <td className="px-4 py-3 text-gray-900">
-                {formatCurrency(point.revenue)}
-              </td>
             </tr>
           ))}
         </tbody>
@@ -279,8 +275,8 @@ const getTrendEmptyState = (data: RevenueByDayPoint[]) => {
     return "За обраний період немає замовлень.";
   }
 
-  if (data.every((point) => point.revenue === 0)) {
-    return "Замовлення ще не принесли дохід у цей проміжок.";
+  if (data.every((point) => point.orders === 0)) {
+    return "Замовлень ще не було у цей період.";
   }
 
   if (data.length < 2) {
@@ -291,11 +287,11 @@ const getTrendEmptyState = (data: RevenueByDayPoint[]) => {
 };
 
 const buildTrendPoints = (data: RevenueByDayPoint[]) => {
-  const maxRevenue = Math.max(...data.map((point) => point.revenue)) || 1;
+  const maxOrders = Math.max(...data.map((point) => point.orders)) || 1;
 
   return data.map((point, index) => {
     const x = (index / (data.length - 1)) * 100;
-    const y = 100 - (point.revenue / maxRevenue) * 100;
+    const y = 100 - (point.orders / maxOrders) * 100;
     return `${x},${y}`;
   });
 };

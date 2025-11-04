@@ -5,6 +5,7 @@ interface FullNominatimResult {
     display_name: string;
     address: {
         road?: string;
+        house_number?: string;
         city?: string;
         town?: string;
         village?: string;
@@ -14,6 +15,9 @@ interface FullNominatimResult {
 export interface SimplifiedNominatimResult {
     place_id: number;
     display_name: string;
+    street: string;
+    city: string;
+    houseNumber?: string;
 }
 
 const CHERNIVTSI_VIEWBOX = '25.85,48.35,26.05,48.23';
@@ -46,32 +50,34 @@ export const autocompleteAddress = async (input: string): Promise<SimplifiedNomi
 
         const data: FullNominatimResult[] = await response.json();
 
-        const simplifiedResults = data.map(item => {
-            const street = item.address.road || '';
+        const simplifiedResults = data.map((item) => {
+            const street = item.address.road?.trim() || '';
+            const houseNumber = item.address.house_number?.trim();
             const city = item.address.city || item.address.town || item.address.village || 'Чернівці';
-            const formattedDisplayName = [street, city].filter(Boolean).join(', ');
+
+            const formattedDisplayName = [street, houseNumber, city]
+                .filter(Boolean)
+                .join(', ');
+
             return {
                 place_id: item.place_id,
                 display_name: formattedDisplayName || item.display_name,
-            };
+                street: street || item.display_name,
+                city,
+                houseNumber,
+            } satisfies SimplifiedNominatimResult;
         });
-
 
         const uniqueResultsMap = new Map<string, SimplifiedNominatimResult>();
 
         for (const result of simplifiedResults) {
-            // Якщо в нашій мапі ще немає результату з такою ж назвою, додаємо його.
-            // Ключем є display_name, що гарантує унікальність за назвою.
-            if (!uniqueResultsMap.has(result.display_name)) {
-                uniqueResultsMap.set(result.display_name, result);
+            const uniqueKey = [result.street.toLowerCase(), result.houseNumber ?? '', result.city.toLowerCase()].join('|');
+            if (!uniqueResultsMap.has(uniqueKey)) {
+                uniqueResultsMap.set(uniqueKey, result);
             }
         }
 
-        // Перетворюємо значення з мапи назад у масив
-        const uniqueResults = Array.from(uniqueResultsMap.values());
-
-
-        return uniqueResults;
+        return Array.from(uniqueResultsMap.values());
 
     } catch (error) {
         console.error("OpenStreetMap Autocomplete Error:", error);

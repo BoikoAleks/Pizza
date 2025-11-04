@@ -2,7 +2,12 @@ import { prisma } from "@/prisma/prisma-client";
 import { OrderStatus, Prisma } from "@prisma/client";
 import { ParsedCartItem } from "./get-orders-with-parsed-items";
 
-const DEFAULT_STATUSES = [OrderStatus.SUCCEEDED];
+const DEFAULT_STATUSES = [
+  OrderStatus.PENDING,
+  OrderStatus.PREPARING,
+  OrderStatus.ON_THE_WAY,
+  OrderStatus.SUCCEEDED,
+];
 
 export type SalesAnalyticsFilters = {
   from?: Date;

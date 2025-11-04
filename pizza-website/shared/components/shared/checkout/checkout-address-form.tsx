@@ -20,9 +20,12 @@ interface Props {
 }
 
 export const CheckoutAddressForm: React.FC<Props> = ({ className }) => {
-  const { control, watch, setValue, setFocus } = useFormContext<CheckoutFormValues>();
+  const { control, watch, setValue, setFocus } =
+    useFormContext<CheckoutFormValues>();
   const streetAddress = watch("address");
-  const [predictions, setPredictions] = useState<SimplifiedNominatimResult[]>([]);
+  const [predictions, setPredictions] = useState<SimplifiedNominatimResult[]>(
+    []
+  );
   const [loading, setLoading] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const [isFocused, setIsFocused] = useState(false);
@@ -48,31 +51,38 @@ export const CheckoutAddressForm: React.FC<Props> = ({ className }) => {
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (wrapperRef.current && !wrapperRef.current.contains(event.target as Node)) {
+      if (
+        wrapperRef.current &&
+        !wrapperRef.current.contains(event.target as Node)
+      ) {
         setPredictions([]);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [wrapperRef]);
-  
-  const handlePredictionClick = (prediction: SimplifiedNominatimResult) => {
-    const parts = prediction.display_name.split(',');
-    const street = parts[0] || '';
-    const house = parts[1]?.trim() || '';
 
-    setValue("address", street, { shouldValidate: true });
-    setValue("houseNumber", house, { shouldValidate: true });
+  const handlePredictionClick = (prediction: SimplifiedNominatimResult) => {
+    setValue("address", prediction.street || prediction.display_name, {
+      shouldValidate: true,
+    });
+
+    setValue("houseNumber", prediction.houseNumber ?? "", {
+      shouldValidate: true,
+    });
     setPredictions([]);
     setTimeout(() => setFocus("apartment"), 100);
   };
-  
+
   // Використовуємо `watch` для більш реактивної перевірки
-  const showHouseApartment = !!watch("address") && watch("address").trim().length > 2;
+  const showHouseApartment =
+    !!watch("address") && watch("address").trim().length > 2;
 
   return (
     <WhiteBlock title="3. Інформація про доставку" className={cn(className)}>
-      <div className="flex flex-col gap-4"> {/* Зменшуємо gap */}
+      <div className="flex flex-col gap-4">
+        {" "}
+        {/* Зменшуємо gap */}
         <div className="relative" ref={wrapperRef}>
           <FormField
             control={control}
@@ -121,7 +131,6 @@ export const CheckoutAddressForm: React.FC<Props> = ({ className }) => {
             </div>
           )}
         </div>
-        
         {/* Поля "Будинок" та "Квартира" з анімацією появи */}
         {showHouseApartment && (
           <div className="grid grid-cols-2 gap-4 animate-in fade-in-50 slide-in-from-top-2 duration-300">
@@ -131,7 +140,11 @@ export const CheckoutAddressForm: React.FC<Props> = ({ className }) => {
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
-                    <Input {...field} placeholder="Номер будинку" className="focus-visible:ring-[var(--ring)]" />
+                    <Input
+                      {...field}
+                      placeholder="Номер будинку"
+                      className="focus-visible:ring-[var(--ring)]"
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -143,7 +156,11 @@ export const CheckoutAddressForm: React.FC<Props> = ({ className }) => {
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
-                    <Input {...field} placeholder="Квартира / Під'їзд" className="focus-visible:ring-[var(--ring)]" />
+                    <Input
+                      {...field}
+                      placeholder="Квартира / Під'їзд"
+                      className="focus-visible:ring-[var(--ring)]"
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -151,7 +168,6 @@ export const CheckoutAddressForm: React.FC<Props> = ({ className }) => {
             />
           </div>
         )}
-
         <FormField
           control={control}
           name="comment"
