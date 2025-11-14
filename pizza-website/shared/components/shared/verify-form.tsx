@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useRef, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -17,31 +17,54 @@ import { Input } from "@/shared/components/ui";
 import { toast } from "react-hot-toast";
 import { verifyEmail } from "@/app/actions";
 import { useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 
 const verifySchema = z.object({
   code: z.string().length(6, "Код має складатися з 6 цифр"),
 });
 
 export const VerifyForm = () => {
+  const searchParams = useSearchParams();
+  const codeFromUrl = searchParams.get("code") ?? "";
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
   const form = useForm({
     resolver: zodResolver(verifySchema),
     defaultValues: {
-      code: "",
+      code: codeFromUrl,
     },
   });
+  const hasAutoSubmittedRef = useRef(false);
 
-  const onSubmit = (data: z.infer<typeof verifySchema>) => {
+  const handleVerify = (code: string) => {
     startTransition(async () => {
       try {
-        await verifyEmail(data.code);
+        await verifyEmail(code);
         toast.success("Пошту успішно підтверджено!");
         router.push("/");
       } catch (error: any) {
-        toast.error(error.message);
+        toast.error(error?.message ?? "Не вдалося підтвердити пошту");
       }
     });
+  };
+
+  useEffect(() => {
+    if (codeFromUrl.length !== 6) {
+      return;
+    }
+
+    form.setValue("code", codeFromUrl);
+
+    if (hasAutoSubmittedRef.current) {
+      return;
+    }
+
+    hasAutoSubmittedRef.current = true;
+    handleVerify(codeFromUrl);
+  }, [codeFromUrl, form]);
+
+  const onSubmit = (data: z.infer<typeof verifySchema>) => {
+    handleVerify(data.code);
   };
 
   return (

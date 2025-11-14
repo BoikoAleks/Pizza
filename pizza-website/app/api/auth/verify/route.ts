@@ -1,5 +1,5 @@
-import { prisma } from '@/prisma/prisma-client';
 import { NextRequest, NextResponse } from 'next/server';
+import { verifyEmail } from '@/app/actions';
 
 export async function GET(req: NextRequest) {
   try {
@@ -9,30 +9,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'Неверный код' }, { status: 400 });
     }
 
-    const verificationCode = await prisma.verificationCode.findFirst({
-      where: {
-        code,
-      },
-    });
-
-    if (!verificationCode) {
-      return NextResponse.json({ error: 'Неверный код' }, { status: 400 });
-    }
-
-    await prisma.user.update({
-      where: {
-        id: verificationCode.userId,
-      },
-      data: {
-        verified: new Date(),
-      },
-    });
-
-    await prisma.verificationCode.delete({
-      where: {
-        id: verificationCode.id,
-      },
-    });
+    await verifyEmail(code);
 
     return NextResponse.redirect(new URL('/?verified', req.url));
   } catch (error) {

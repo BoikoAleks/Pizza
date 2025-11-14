@@ -11,6 +11,7 @@ import { getUserSession } from "@/shared/lib/get-user-session";
 import { OrderStatus, Prisma } from "@prisma/client";
 import { hashSync } from "bcrypt";
 import { cookies } from "next/headers";
+import { encode } from "next-auth/jwt";
 import { redirect } from "next/navigation";
 import Stripe from "stripe";
 import { z } from "zod";
@@ -332,13 +333,51 @@ export async function verifyEmail(code: string) {
       throw new Error("Термін дії коду закінчився.");
     }
 
-    await prisma.user.update({
+    const user = await prisma.user.update({
       where: { id: verificationCode.userId },
       data: { verified: new Date() },
+      select: {
+        id: true,
+        email: true,
+        fullName: true,
+        role: true,
+      },
     });
 
     await prisma.verificationCode.delete({
       where: { id: verificationCode.id },
+    });
+
+    if (!process.env.NEXTAUTH_SECRET) {
+      throw new Error("NEXTAUTH_SECRET не налаштовано.");
+    }
+
+    const maxAge = 30 * 24 * 60 * 60; // 30 днів
+    const sessionToken = await encode({
+      secret: process.env.NEXTAUTH_SECRET,
+      token: {
+        name: user.fullName,
+        email: user.email,
+        picture: null,
+        sub: String(user.id),
+        id: String(user.id),
+        role: user.role,
+      },
+      maxAge,
+    });
+
+    const cookieStore = await cookies();
+    const cookieName =
+      process.env.NODE_ENV === "production"
+        ? "__Secure-next-auth.session-token"
+        : "next-auth.session-token";
+
+    cookieStore.set(cookieName, sessionToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/",
+      maxAge,
     });
   } catch (error) {
     console.error("[VERIFY_EMAIL]", error);
