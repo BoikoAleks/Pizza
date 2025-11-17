@@ -1,10 +1,7 @@
 "use server";
 
 import { prisma } from "@/prisma/prisma-client";
-import {
-  PayOrderTemplate,
-  VerificationUserTemplate,
-} from "@/shared/components/shared/email-templates";
+import { VerificationUserTemplate } from "@/shared/components/shared/email-templates";
 import { CheckoutFormValues } from "@/shared/constants";
 import { sendEmail } from "@/shared/lib";
 import { getUserSession } from "@/shared/lib/get-user-session";
@@ -12,8 +9,6 @@ import { OrderStatus, Prisma } from "@prisma/client";
 import { hashSync } from "bcrypt";
 import { cookies } from "next/headers";
 import { encode } from "next-auth/jwt";
-import { redirect } from "next/navigation";
-import Stripe from "stripe";
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import {
@@ -32,7 +27,9 @@ import {
 import { writeFile, mkdir } from "fs/promises";
 import path from "path";
 
-export async function createOrder(data: CheckoutFormValues) {
+export async function createOrder(
+  data: CheckoutFormValues
+): Promise<string> {
   try {
     const cookieStore = await cookies();
     const cartToken = cookieStore.get("cartToken")?.value;
@@ -136,108 +133,18 @@ export async function createOrder(data: CheckoutFormValues) {
       },
     });
 
-    const paymentUrl = `${process.env.NEXT_PUBLIC_APP_URL}/payment/${order.id}`;
+    const baseUrl = (process.env.NEXT_PUBLIC_APP_URL ?? "").replace(/\/$/, "");
+    const paymentPath = `/payment/${order.id}`;
+    const paymentUrl = baseUrl ? `${baseUrl}${paymentPath}` : paymentPath;
 
-    await sendEmail(
-      data.email,
-      'Next Pizza / Оплатіть замовлення #' + order.id,
-      await PayOrderTemplate({
-        orderId: order.id,
-        totalAmount: order.totalAmount,
-        paymentUrl,
-      }),
-    );
-
-
-    try {
-      const stripeLocal = new Stripe(process.env.STRIPE_SECRET_KEY!);
-
-      const checkoutSession = await stripeLocal.checkout.sessions.create({
-        payment_method_types: ["card"],
-        line_items: [
-          {
-            price_data: {
-              currency: "uah",
-              product_data: {
-                name: `Замовлення #${order.id}`,
-                description: `Оплата замовлення в Pizza Republic`,
-              },
-              unit_amount: order.totalAmount * 100,
-            },
-            quantity: 1,
-          },
-        ],
-        mode: "payment",
-        success_url: `${process.env.NEXT_PUBLIC_APP_URL}/?paidOrder=${order.id}`,
-        cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/payment/cancel`,
-        metadata: { orderId: order.id },
-      });
-
-      if (checkoutSession.url) {
-        return checkoutSession.url;
-      }
-    } catch (err) {
-      console.log("[createOrder] Stripe session creation failed", err);
-    }
-
-    return paymentUrl;
-  } catch (err) {
-    console.log("[CreateOrder] Server error", err);
-
-    throw new Error("Failed to create order.");
+    return paymentPath;
+  } catch (error) {
+    console.error("Error [CREATE_ORDER]", error);
+    throw error;
   }
 }
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
-export async function createCheckoutSession(formData: FormData) {
-  const orderId = Number(formData.get("orderId"));
-
-  if (!orderId) {
-    throw new Error("Order ID is required");
-  }
-
-  const order = await prisma.order.findUnique({
-    where: { id: orderId },
-  });
-
-  if (!order) {
-    throw new Error("Order not found");
-  }
-
-  const checkoutSession = await stripe.checkout.sessions.create({
-    payment_method_types: ["card"],
-    line_items: [
-      {
-        price_data: {
-          currency: "uah",
-          product_data: {
-            name: `Замовлення #${order.id}`,
-            description: `Оплата замовлення в Pizza Republic`,
-          },
-
-          unit_amount: order.totalAmount * 100,
-        },
-        quantity: 1,
-      },
-    ],
-    mode: "payment",
-
-    success_url: `${process.env.NEXT_PUBLIC_APP_URL}/payment/success?orderId=${order.id}`,
-    cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/payment/cancel`,
-
-    metadata: {
-      orderId: order.id,
-    },
-  });
-
-  if (!checkoutSession.url) {
-    throw new Error("Could not create checkout session");
-  }
-
-  // 5. Перенаправляємо користувача на сторінку оплати Stripe
-  redirect(checkoutSession.url);
-}
 
 export async function updateUserInfo(body: Prisma.UserUpdateInput) {
   try {
