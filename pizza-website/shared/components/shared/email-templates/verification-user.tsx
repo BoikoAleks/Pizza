@@ -4,7 +4,7 @@ interface Props {
   code: string;
 }
 
-const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+const appUrl = process.env. NEXT_PUBLIC_APP_URL || "";
 
 export const VerificationUserTemplate: React.FC<Props> = ({ code }) => (
   <div style={{
