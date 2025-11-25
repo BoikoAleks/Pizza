@@ -6,9 +6,13 @@ import {
   useElements,
   PaymentElement,
 } from "@stripe/react-stripe-js";
-import convertToSubcurrency from "@/shared/lib/convertToSubcurrency";
 
-const CheckoutPage = ({ amount }: { amount: number }) => {
+type CheckoutPageProps = {
+  orderId: number;
+  amount: number;
+};
+
+const CheckoutPage = ({ orderId, amount }: CheckoutPageProps) => {
   const stripe = useStripe();
   const elements = useElements();
   const [errorMessage, setErrorMessage] = useState<string>();
@@ -17,16 +21,31 @@ const CheckoutPage = ({ amount }: { amount: number }) => {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL;
 
   useEffect(() => {
-    fetch("/api/create-payment-intent", {
+    if (!orderId) {
+      setErrorMessage("Невірний номер замовлення");
+      return;
+    }
+
+    setErrorMessage(undefined);
+    setClientSecret("");
+
+    fetch("/api/payment-intent", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ amount: convertToSubcurrency(amount) }),
+      body: JSON.stringify({ orderId }),
     })
       .then((res) => res.json())
-      .then((data) => setClientSecret(data.clientSecret));
-  }, [amount]);
+      .then((data) => {
+        if (data?.clientSecret) {
+          setClientSecret(data.clientSecret);
+        } else if (data?.error) {
+          setErrorMessage(data.error);
+        }
+      })
+      .catch(() => setErrorMessage("Не вдалося створити оплату"));
+  }, [orderId]);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -48,7 +67,10 @@ const CheckoutPage = ({ amount }: { amount: number }) => {
       elements,
       clientSecret,
       confirmParams: {
-        return_url: `${appUrl}/payment-success?amount=${amount}`,
+        return_url: `${(appUrl ??
+          (typeof window !== "undefined" ? window.location.origin : "")
+        )
+          .replace(/\/$/, "") || ""}/payment/success?orderId=${orderId}&amount=${amount}`,
       },
     });
 
@@ -82,10 +104,10 @@ const CheckoutPage = ({ amount }: { amount: number }) => {
       {errorMessage && <div>{errorMessage}</div>}
 
       <button
-        disabled={!stripe || loading}
+        disabled={!stripe || loading || !clientSecret}
         className="text-white w-full p-5 bg-black mt-2 rounded-md font-bold disabled:opacity-50 disabled:animate-pulse"
       >
-        {!loading ? `Pay $${amount}` : "Processing..."}
+        {!loading ? `Сплатити ${amount} грн` : "Обробка..."}
       </button>
     </form>
   );

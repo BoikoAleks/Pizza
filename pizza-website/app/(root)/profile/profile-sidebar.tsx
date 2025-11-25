@@ -14,9 +14,11 @@ const sidebarLinks = [
 
 export const ProfileSidebar = () => {
   const pathname = usePathname();
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "");
 
   const onClickSignOut = () => {
-    signOut({ callbackUrl: "/" });
+    const callbackUrl = appUrl ? `${appUrl}/` : "/";
+    signOut({ callbackUrl });
   };
 
   return (
