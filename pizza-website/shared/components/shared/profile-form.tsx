@@ -52,7 +52,7 @@ export const ProfileForm: React.FC<Props> = ({ data }) => {
 
   const onClickSignOut = () => {
     signOut({
-      callbackUrl: "/",
+      callbackUrl: process.env.NEXT_PUBLIC_APP_URL,
     });
   };
 

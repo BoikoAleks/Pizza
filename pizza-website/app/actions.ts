@@ -4,6 +4,7 @@ import { prisma } from "@/prisma/prisma-client";
 import { VerificationUserTemplate } from "@/shared/components/shared/email-templates";
 import { CheckoutFormValues } from "@/shared/constants";
 import { sendEmail } from "@/shared/lib";
+import { calcCartItemTotalPrice } from "@/shared/lib/calc-cart-item-total-price";
 import { getUserSession } from "@/shared/lib/get-user-session";
 import { OrderStatus, Prisma } from "@prisma/client";
 import { hashSync } from "bcrypt";
@@ -72,7 +73,10 @@ export async function createOrder(
 
     const DELIVERY_FEE = 100;
     const isDelivery = data.deliveryMethod === "delivery";
-    const finalTotal = userCart.totalAmount + (isDelivery ? DELIVERY_FEE : 0);
+    const itemsTotal = userCart.items.reduce((sum, item) => {
+      return sum + calcCartItemTotalPrice(item);
+    }, 0);
+    const finalTotal = Math.round(itemsTotal + (isDelivery ? DELIVERY_FEE : 0));
 
     let deliveryTimestamp: string | undefined = undefined;
     if (data.deliveryTime) {

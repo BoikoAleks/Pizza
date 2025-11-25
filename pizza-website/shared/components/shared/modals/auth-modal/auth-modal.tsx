@@ -38,7 +38,7 @@ export const AuthModal: React.FC<Props> = ({ open, onClose }) => {
             variant="secondary"
             onClick={() =>
               signIn("google", {
-                callbackUrl: "/",
+                callbackUrl: process.env.NEXT_GOOGLE_APP_URL || "/",
                 redirect: true,
               })
             }

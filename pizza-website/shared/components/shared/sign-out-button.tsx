@@ -8,7 +8,8 @@ export const SignOutButton = () => {
   return (
     <button
       onClick={() => {
-        const callbackUrl = appUrl ? `${appUrl}/` : "/";
+        const appUrl = process.env.NEXT_PUBLIC_APP_URL;
+        const callbackUrl = appUrl || "/"; 
         signOut({ callbackUrl });
       }}
       className="flex items-center gap-2 text-gray-500 hover:text-[var(--primary)] transition-colors"

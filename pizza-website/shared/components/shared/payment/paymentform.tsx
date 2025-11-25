@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   useStripe,
   useElements,
@@ -16,44 +16,17 @@ const CheckoutPage = ({ orderId, amount }: CheckoutPageProps) => {
   const stripe = useStripe();
   const elements = useElements();
   const [errorMessage, setErrorMessage] = useState<string>();
-  const [clientSecret, setClientSecret] = useState("");
   const [loading, setLoading] = useState(false);
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL;
-
-  useEffect(() => {
-    if (!orderId) {
-      setErrorMessage("Невірний номер замовлення");
-      return;
-    }
-
-    setErrorMessage(undefined);
-    setClientSecret("");
-
-    fetch("/api/payment-intent", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ orderId }),
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        if (data?.clientSecret) {
-          setClientSecret(data.clientSecret);
-        } else if (data?.error) {
-          setErrorMessage(data.error);
-        }
-      })
-      .catch(() => setErrorMessage("Не вдалося створити оплату"));
-  }, [orderId]);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setLoading(true);
 
     if (!stripe || !elements) {
       return;
     }
+
+    setLoading(true);
+    setErrorMessage(undefined);
 
     const { error: submitError } = await elements.submit();
 
@@ -63,51 +36,38 @@ const CheckoutPage = ({ orderId, amount }: CheckoutPageProps) => {
       return;
     }
 
+    const origin =
+      process.env.NEXT_PUBLIC_APP_URL ??
+      (typeof window !== "undefined" ? window.location.origin : "");
+    const cleanedOrigin = origin.replace(/\/$/, "");
+
     const { error } = await stripe.confirmPayment({
       elements,
-      clientSecret,
       confirmParams: {
-        return_url: `${(appUrl ??
-          (typeof window !== "undefined" ? window.location.origin : "")
-        )
-          .replace(/\/$/, "") || ""}/payment/success?orderId=${orderId}&amount=${amount}`,
+        return_url: `${cleanedOrigin}/payment/success?orderId=${orderId}&amount=${amount}`,
       },
     });
 
     if (error) {
-      setErrorMessage(error.message);
-    } else {
+      setErrorMessage(error.message ?? "Оплату не вдалося завершити");
     }
 
     setLoading(false);
   };
 
-  if (!clientSecret || !stripe || !elements) {
-    return (
-      <div className="flex items-center justify-center">
-        <div
-          className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-e-transparent align-[-0.125em] text-surface motion-reduce:animate-[spin_1.5s_linear_infinite] dark:text-white"
-          role="status"
-        >
-          <span className="!absolute !-m-px !h-px !w-px !overflow-hidden !whitespace-nowrap !border-0 !p-0 ![clip:rect(0,0,0,0)]">
-            Loading...
-          </span>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <form onSubmit={handleSubmit} className="bg-white p-2 rounded-md">
-      {clientSecret && <PaymentElement />}
+    <form onSubmit={handleSubmit} className="bg-white p-2 rounded-md shadow-lg">
+      <PaymentElement />
 
-      {errorMessage && <div>{errorMessage}</div>}
+      {errorMessage && (
+        <div className="text-red-500 mt-3 text-sm">{errorMessage}</div>
+      )}
 
       <button
-        disabled={!stripe || loading || !clientSecret}
-        className="text-white w-full p-5 bg-black mt-2 rounded-md font-bold disabled:opacity-50 disabled:animate-pulse"
+        disabled={!stripe || !elements || loading}
+        className="text-white w-full p-4 bg-black mt-4 rounded-md font-bold disabled:opacity-50"
       >
-        {!loading ? `Сплатити ${amount} грн` : "Обробка..."}
+        {loading ? "Обробка..." : `Сплатити ${amount} грн`}
       </button>
     </form>
   );
