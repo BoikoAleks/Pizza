@@ -21,20 +21,14 @@ export const usePizzaOptions = (items: ProductItem[]): ReturnProps => {
   const [type, setType] = React.useState<PizzaType>(1);
   const [selectedIngredients, { toggle: addIngredient }] = useSet(new Set<number>([]));
 
-  // --- ОПТИМІЗАЦІЯ 1: Мемоізуємо розрахунок доступних розмірів ---
-  // Цей блок буде виконуватись тільки тоді, коли змінюється `type` або `items`
   const availableSizes = useMemo(() => {
     return getAvailablePizzaSizes(type, items);
   }, [type, items]);
 
-  // --- ОПТИМІЗАЦІЯ 2: Мемоізуємо пошук поточного варіанту ---
-  // Цей блок буде виконуватись тільки тоді, коли змінюється `type` або `size`
   const currentItemId = useMemo(() => {
     return items.find((item) => item.pizzaType === type && item.size === size)?.id;
   }, [type, size, items]);
 
-  // --- ЛОГІКА ПЕРЕКЛЮЧЕННЯ РОЗМІРУ (залишається в useEffect) ---
-  // Цей ефект, як і раніше, відповідає за автоматичний вибір доступного розміру
   useEffect(() => {
     const isCurrentSizeAvailable = availableSizes.some(
       (item) => Number(item.value) === size && !item.disabled

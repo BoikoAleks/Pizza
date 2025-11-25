@@ -47,7 +47,7 @@ export const authOptions: AuthOptions = {
                 if (!isValidPassword) return null;
                 if (!findUser.verified) return null;
 
-                // Цей `id` правильний - він з нашої бази даних
+
                 return {
                     id: findUser.id,
                     email: findUser.email,
@@ -64,7 +64,7 @@ export const authOptions: AuthOptions = {
     callbacks: {
         async signIn({ user, account }) {
             try {
-                // Clear anonymous cart on sign in
+
                 const cookieStore = cookies();
                 if ((await cookieStore).get('cartToken')) {
                     (await cookieStore).delete('cartToken');
@@ -112,38 +112,28 @@ export const authOptions: AuthOptions = {
             }
         },
 
-        // ===================================================================
-        // =================== ОСНОВНЕ ВИПРАВЛЕННЯ ТУТ ===================
-        // ===================================================================
         async jwt({ token }) {
-            // Цей callback тепер буде надійною точкою для збагачення токена
-            // даними з НАШОЇ бази даних.
 
-            // 1. Знаходимо користувача в нашій базі даних Prisma за email з токена.
-            //    Email - це єдиний надійний унікальний ідентифікатор.
             const dbUser = await prisma.user.findUnique({
                 where: {
                     email: token.email!,
                 },
             });
 
-            // 2. Якщо користувача знайдено, ми збагачуємо токен даними з нашої БД.
             if (dbUser) {
                 return {
                     ...token,
-                    id: String(dbUser.id),   // <-- Кладемо ID з Prisma (як рядок)
-                    role: dbUser.role,       // <-- Кладемо роль з Prisma
-                    name: dbUser.fullName,   // <-- Кладемо ім'я з Prisma
+                    id: String(dbUser.id),
+                    role: dbUser.role,
+                    name: dbUser.fullName,
                 };
             }
 
-            // Якщо користувача не знайдено, повертаємо оригінальний токен
+
             return token;
         },
 
         session({ session, token }) {
-            // 3. Тепер `token` гарантовано містить правильний ID з нашої БД.
-            //    Ми просто переносимо ці дані в об'єкт сесії.
             if (session?.user) {
                 session.user.id = token.id;
                 session.user.role = token.role;

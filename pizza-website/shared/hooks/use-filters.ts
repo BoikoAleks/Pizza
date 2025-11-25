@@ -58,8 +58,8 @@ export const useFilters = (): ReturnProps => {
     priceFrom: Number(searchParams.get("priceFrom")),
     priceTo: Number(searchParams.get("priceTo")),
   });
-  
-// Функція для оновлення ціни
+
+  // Функція для оновлення ціни
   const updatePrice = (name: keyof PriceProps, value: number) => {
     setPrices((prev) => ({
       ...prev,

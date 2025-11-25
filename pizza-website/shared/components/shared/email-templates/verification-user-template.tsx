@@ -16,7 +16,7 @@ interface Props {
   code: string;
 }
 
-const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "";
+const baseUrl = process.env.NEXT_PUBLIC_APP_URL;
 
 export const VerificationUserTemplate = ({ fullName, code }: Props) => (
   <Html>
